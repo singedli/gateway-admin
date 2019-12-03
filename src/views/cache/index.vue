@@ -110,11 +110,8 @@ export default {
       listLoading: true,
       listQuery: {
         pageNo: 1,
-        pageSize: 10,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageSize: 10
+
       }
 
     }
@@ -124,7 +121,7 @@ export default {
   },
   methods: {
     getList() {
-      getList({ 'page': 1, 'size': 10 }).then(response => {
+      getList({ 'pageNo': 1, 'pageSize': 10 }).then(response => {
         this.listLoading = false
         this.list = response.data.records
         console.log(response.data.records)
