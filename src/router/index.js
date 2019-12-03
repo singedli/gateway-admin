@@ -36,9 +36,48 @@ export const constantRoutes = [
     children: [
       {
         path: 'index',
-        name: '查看缓存',
+        name: 'cache',
         component: () => import('@/views/cache/index'),
-        meta: { title: '缓存管理', icon: 'form' }
+        meta: { title: '缓存策略管理', icon: 'form' }
+      }
+    ]
+  },
+
+  {
+    path: '/gatewayInterface',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'gatewayInterface',
+        component: () => import('@/views/gatewayInterface/index'),
+        meta: { title: '网关接口管理', icon: 'form' }
+      }
+    ]
+  },
+
+  {
+    path: '/backonInterface',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'backonInterface',
+        component: () => import('@/views/backonInterface/index'),
+        meta: { title: '后台接口管理', icon: 'form' }
+      }
+    ]
+  },
+
+  {
+    path: '/limit',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'backonInterface',
+        component: () => import('@/views/backonInterface/index'),
+        meta: { title: '限流策略管理', icon: 'form' }
       }
     ]
   },
