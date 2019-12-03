@@ -4,7 +4,7 @@ export function getList(params) {
   return request({
     baseURL: 'http://localhost:9000/gateway',
     url: '/cache/config/all',
-    method: 'get',
-    params
+    method: 'post',
+    data: params
   })
 }
