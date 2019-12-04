@@ -75,8 +75,8 @@ export const constantRoutes = [
     children: [
       {
         path: 'index',
-        name: 'backonInterface',
-        component: () => import('@/views/backonInterface/index'),
+        name: 'limit',
+        component: () => import('@/views/limit/index'),
         meta: { title: '限流策略管理', icon: 'form' }
       }
     ]
