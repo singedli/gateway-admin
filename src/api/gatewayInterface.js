@@ -17,3 +17,12 @@ export function deleteById(params) {
     data: params
   })
 }
+
+export function updateGatewayInterface(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/config/interface/update',
+    method: 'post',
+    data: params
+  })
+}

@@ -46,7 +46,6 @@
       fit
       highlight-current-row
       style="width: 100%;"
-      @sort-change="sortChange"
     >
       <el-table-column label="ID" prop="id" align="center" width="80">
         <template slot-scope="{row}">
@@ -83,9 +82,9 @@
 
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleDelete(row.id)">编辑</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
-          <el-button type="primary" size="mini">失效</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -103,13 +102,52 @@
         @current-change="handleCurrentChange"
       />
     </div>
+    <el-dialog title="网关接口" :visible.sync="dialogCreateVisible" center="true">
+      <el-form :model="updateForm" label-width="20%">
+        <el-form-item label="接口名称:">
+          <el-input v-model="updateForm.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="URL:">
+          <el-input v-model="updateForm.url" autocomplete="off" label="url" />
+        </el-form-item>
+        <el-form-item label="后台URL:">
+          <el-input v-model="updateForm.backonUrl" autocomplete="off" label="backonUrl" />
+        </el-form-item>
+        <el-form-item label="类型:">
+          <el-select v-model="updateForm.type" placeholder="请选择类型">
+            <el-option label="透传" value="PASS" />
+            <el-option label="并发" value="CONCURRENT" />
+            <el-option label="复杂" value="COMPLICATE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="系统:">
+          <el-input v-model="updateForm.system" autocomplete="off" label="系统" />
+        </el-form-item>
+        <el-form-item label="前置拦截器:">
+          <el-input v-model="updateForm.preInterceptors" autocomplete="off" label="前置拦截器" />
+        </el-form-item>
+        <el-form-item label="后置拦截器:">
+          <el-input v-model="updateForm.postInterceptors" autocomplete="off" label="后置拦截器" />
+        </el-form-item>
+        <el-form-item label="状态:">
+          <el-select v-model="updateForm.status" placeholder="请选择状态">
+            <el-option label="true" value="生效" />
+            <el-option label="false" value="失效" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
-import { getList, deleteById } from '@/api/gatewayInterface'
+import { getList, deleteById, updateGatewayInterface } from '@/api/gatewayInterface'
 
 export default {
   name: 'ComplexTable',
@@ -127,16 +165,26 @@ export default {
   },
   data() {
     return {
-      tableKey: 0,
       list: null,
       total: 0,
       listLoading: true,
       listQuery: {
         current: 1,
         size: 10
-
-      }
-
+      },
+      dialogCreateVisible: false,
+      updateForm: {
+        name: '',
+        url: '',
+        backonUrl: '',
+        type: '',
+        status: '',
+        system: '',
+        preInterceptors: '',
+        postInterceptors: '',
+        invokeConfig: ''
+      },
+      systemData: []
     }
   },
   created() {
@@ -147,8 +195,6 @@ export default {
       getList(this.listQuery).then(response => {
         this.listLoading = false
         this.list = response.data.records
-        console.log(response.data.records)
-        console.log(response)
       })
     },
     handleClearQueryParams() {
@@ -172,7 +218,29 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
+    handleUpdateStatus(gatewayInterface) {
+      gatewayInterface.status = !gatewayInterface.status
+      updateGatewayInterface(gatewayInterface).then(res => {
+        if (res.code === '00000000') {
+          this.$notify({
+            title: 'Success',
+            message: gatewayInterface.status ? '配置已生效' : '配置已失效',
+            type: 'success',
+            duration: 1000
+          })
+          this.getList(this.listQuery)
+        }
+      })
+    },
+    handleUpdate(gatewayInterface) {
+      this.dialogCreateVisible = true
+    },
+    handleSizeChange() {
 
+    },
+    handleCurrentChange() {
+
+    },
     getUrl(url) {
       this.$router.push({ path: url })
     }
