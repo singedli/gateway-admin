@@ -48,7 +48,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80" :class-name="getSortClass('id')">
+      <el-table-column label="ID" prop="id" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
@@ -82,12 +82,11 @@
       </el-table-column>
 
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
-        <!-- <template slot-scope="{row}"> -->
-        <el-button type="primary" size="mini">编辑</el-button>
-        <el-button type="primary" size="mini">删除</el-button>
-        <el-button type="primary" size="mini">失效</el-button>
-
-        <!-- </template> -->
+        <template slot-scope="{row}">
+          <el-button type="primary" size="mini" @click="handleDelete(row.id)">编辑</el-button>
+          <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
+          <el-button type="primary" size="mini">失效</el-button>
+        </template>
       </el-table-column>
     </el-table>
 
@@ -109,12 +108,13 @@
 
 <script>
 import waves from '@/directive/waves' // waves directive
-import { parseTime } from '@/utils'
-import { getList } from '@/api/gatewayInterface'
+// import { parseTime } from '@/utils'
+import { getList, deleteById } from '@/api/gatewayInterface'
 
 export default {
   name: 'ComplexTable',
   directives: { waves },
+  inject: ['reload'],
   filters: {
     typeFilter(type) {
       const typeMap = {
@@ -155,111 +155,26 @@ export default {
       this.listQuery = {}
     },
 
-    handleSizeChange() {
-
+    handleDelete(id) {
+      deleteById({ 'id': id }).then(res => {
+        if (res.code === '00000000') {
+          this.$notify({
+            title: 'Success',
+            message: '删除成功',
+            type: 'success',
+            duration: 1000
+          })
+          this.getList(this.listQuery)
+        }
+      })
     },
-    handleCurrentChange() {},
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
-    },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
-    resetTemp() {
-      this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
-      }
-    },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-        }
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-        }
-      })
-    },
-    handleDelete(row) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
-    },
-    handleFetchPv(pv) {
 
-    },
-    handleDownload() {
-
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'createTime') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
-    },
-    getSortClass: function(key) {
-      const sort = this.listQuery.sort
-      return sort === `+${key}`
-        ? 'ascending'
-        : sort === `-${key}`
-          ? 'descending'
-          : ''
+    getUrl(url) {
+      this.$router.push({ path: url })
     }
   }
 }

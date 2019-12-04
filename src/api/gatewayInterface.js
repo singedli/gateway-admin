@@ -8,3 +8,12 @@ export function getList(params) {
     data: params
   })
 }
+
+export function deleteById(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/config/interface/delete',
+    method: 'post',
+    data: params
+  })
+}
