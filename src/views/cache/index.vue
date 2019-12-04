@@ -17,6 +17,14 @@
       <el-form-item label="状态:">
         <el-input v-model="listQuery.status" placeholder="状态" />
       </el-form-item>
+
+       <el-form-item label="最大缓存条目:">
+        <el-input v-model="listQuery.resultNum" placeholder="最大缓存条目" />
+      </el-form-item>
+
+       <el-form-item label="过期时间:">
+        <el-input v-model="listQuery.expireTime" placeholder="过期时间" />
+      </el-form-item>
       <!-- <el-form-item label="活动区域">
         <el-select v-model="formInline.region" placeholder="活动区域">
           <el-option label="区域一" value="shanghai" />
@@ -24,7 +32,13 @@
         </el-select>
       </el-form-item> -->
       <el-form-item>
-        <el-button type="primary">查询</el-button>
+        <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+          查询
+          </el-button>
+
+        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+        新增
+        </el-button>
       </el-form-item>
     </el-form>
 
@@ -47,6 +61,7 @@
       <el-table-column label="URL" width="150px" align="center" prop="url" />
       <el-table-column label="后台URL" width="150px" align="center" prop="backonUrl" />
       <el-table-column label="请求体配置" width="150px" align="center" prop="requestBody" />
+      <el-table-column label="响应体配置" width="150px" align="center" prop="responseBody" />
       <el-table-column label="最大缓存条目" width="150px" align="center" prop="resultNum" />
       <el-table-column label="过期时间" width="150px" align="center" prop="expireTime" />
       <el-table-column label="状态" width="150px" align="center">
@@ -56,49 +71,87 @@
       </el-table-column>
       <el-table-column label="创建时间" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime }}</span>
+          <span>{{ row.createTime  }}</span>
         </template>
       </el-table-column>
       <el-table-column label="更新时间" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.updateTime }}</span>
+          <span>{{ row.updateTime  }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
-        <!-- <template slot-scope="{row}"> -->
-        <el-button type="primary" size="mini">编辑</el-button>
-        <el-button type="primary" size="mini">删除</el-button>
-        <el-button type="primary" size="mini">失效</el-button>
+        <template slot-scope="{row}">
+            <el-button type="primary" size="mini" @click="handleUpdate(row)">
+              编辑
+            </el-button>
+            <el-button type="primary" size="mini" @click="handleDelete(row)">
+              删除
+            </el-button>
 
-        <!-- </template> -->
+        </template>
       </el-table-column>
     </el-table>
 
-    <div class="block">
-      <el-pagination
-        align="center"
-        background
-        :current-page="1"
-        :page-sizes="[5, 10, 20, 50]"
-        :page-size="10"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="list.length"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-  </div>
+    <pagination v-show="total>0" :total="total" :pageSizes="[1,2]" :page.sync="listQuery.current" :limit.sync="listQuery.size" @pagination="getList" />
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="名字" prop=" name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="URL" prop="url">
+          <el-input v-model="temp.url" />
+        </el-form-item>
+        <el-form-item label="后台URL" prop="backonUrl">
+          <el-input v-model="temp.backonUrl" />
+        </el-form-item>
+        <el-form-item label="请求体" prop="requestBody">
+          <el-input v-model="temp.requestBody" />
+        </el-form-item>
+        <el-form-item label="响应体" prop="responseBody">
+          <el-input v-model="temp.responseBody" />
+        </el-form-item>
+        <el-form-item label="最大缓存条目" prop="resultNum">
+          <el-input v-model="temp.resultNum" />
+        </el-form-item>
+        <el-form-item label="过期时间" prop="expireTime">
+          <el-input v-model="temp.expireTime" />
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          Cancel
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          Confirm
+        </el-button>
+      </div>
+    </el-dialog>
+
+  </div> 
 </template>
 
 <script>
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import { getList } from '@/api/cache'
+import { getGatewayCacheList , getGatewayCacheDetail,deleteGatewayCache,createGatewayCache,updateGatewayCache} from '@/api/cache'
+import Pagination from '@/components/Pagination'
+
+const calendarTypeOptions = [
+  { key: "true", display_name: '生效' },
+  { key: "fasle" , display_name: '失效' }
+]
 
 export default {
-  name: 'ComplexTable',
+  name: 'GatewayCacheTable',
   directives: { waves },
+  components: { Pagination },
   filters: {
 
   },
@@ -109,11 +162,24 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        pageNo: 1,
-        pageSize: 10
-
-      }
-
+        current: 1,
+        size: 2
+      },
+      dialogFormVisible: false,
+      dialogStatus: '',
+       textMap: {
+        update: 'Edit',
+        create: 'Create'
+      },
+      rules: {
+        type: [{ required: true, message: 'type is required', trigger: 'change' }],
+        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
+        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+      },
+      calendarTypeOptions,
+       temp: {
+        
+      },
     }
   },
   created() {
@@ -121,9 +187,11 @@ export default {
   },
   methods: {
     getList() {
-      getList({ 'pageNo': 1, 'pageSize': 10 }).then(response => {
+      getGatewayCacheList(this.listQuery).then(response => {
         this.listLoading = false
         this.list = response.data.records
+        this.total = response.data.total
+        this.pages = response.data.pages
         console.log(response.data.records)
         console.log(response)
       })
@@ -134,7 +202,7 @@ export default {
     },
     handleCurrentChange() {},
     handleFilter() {
-      this.listQuery.page = 1
+      this.listQuery.current = 1
       this.getList()
     },
     handleModifyStatus(row, status) {
@@ -180,12 +248,15 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+          console.log(this.temp)
+          createGatewayCache(this.temp).then(response => {
+            console.log(response)
+          })
         }
       })
     },
     handleUpdate(row) {
+      console.log(row.id)
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
@@ -197,20 +268,18 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          console.log(this.temp.responseBody)
+          updateGatewayCache(this.temp).then(response => {
+            console.log(response)
+          })
         }
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+       console.log(row.id)
+          deleteGatewayCache(row).then(response => {
+            console.log(response)
+          })
     },
     handleFetchPv(pv) {
 
