@@ -35,11 +35,12 @@
       </el-form-item> -->
       <el-button type="primary" @click="getList">查询</el-button>
       <el-button type="primary" @click="handleClearQueryParams">清空</el-button>
-
+      <el-form-item align="left">
+        <el-button type="primary" align="left" @click="handleCreateGatewayInterface">新增接口配置</el-button>
+      </el-form-item>
     </el-form>
 
     <el-table
-      :key="tableKey"
       v-loading="listLoading"
       :data="list"
       border
@@ -102,7 +103,7 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <el-dialog title="网关接口" :visible.sync="dialogCreateVisible" center="true">
+    <el-dialog title="网关接口" :visible.sync="dialogCreateVisible" class="form-inline">
       <el-form :model="updateForm" label-width="20%">
         <el-form-item label="接口名称:">
           <el-input v-model="updateForm.name" autocomplete="off" />
@@ -131,14 +132,14 @@
         </el-form-item>
         <el-form-item label="状态:">
           <el-select v-model="updateForm.status" placeholder="请选择状态">
-            <el-option label="true" value="生效" />
-            <el-option label="false" value="失效" />
+            <el-option label="生效" value="true" />
+            <el-option label="失效" value="false" />
           </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button @click="dialogCreateVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm(flag)">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -147,7 +148,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
-import { getList, deleteById, updateGatewayInterface } from '@/api/gatewayInterface'
+import { getList, deleteById, updateGatewayInterface, createGatewayInterface } from '@/api/gatewayInterface'
 
 export default {
   name: 'ComplexTable',
@@ -165,6 +166,7 @@ export default {
   },
   data() {
     return {
+      flag: '',
       list: null,
       total: 0,
       listLoading: true,
@@ -234,6 +236,42 @@ export default {
     },
     handleUpdate(gatewayInterface) {
       this.dialogCreateVisible = true
+      this.updateForm = gatewayInterface
+      this.flag = 'update'
+    },
+    handleCreateGatewayInterface() {
+      this.dialogCreateVisible = true
+      this.updateForm = {}
+      this.flag = 'create'
+    },
+    submitForm(flag) {
+      this.dialogCreateVisible = false
+      if (flag === 'create') {
+        createGatewayInterface(this.updateForm).then(res => {
+          if (res.code === '00000000') {
+            this.$notify({
+              title: 'Success',
+              message: '新增配置成功',
+              type: 'success',
+              duration: 1000
+            })
+            this.getList(this.listQuery)
+          }
+        })
+      }
+      if (flag === 'update') {
+        updateGatewayInterface(this.updateForm).then(res => {
+          if (res.code === '00000000') {
+            this.$notify({
+              title: 'Success',
+              message: '修改配置成功',
+              type: 'success',
+              duration: 1000
+            })
+            this.getList(this.listQuery)
+          }
+        })
+      }
     },
     handleSizeChange() {
 

@@ -26,3 +26,12 @@ export function updateGatewayInterface(params) {
     data: params
   })
 }
+
+export function createGatewayInterface(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/config/interface/create',
+    method: 'post',
+    data: params
+  })
+}
