@@ -53,3 +53,21 @@ export function updateGatewayCache(params) {
     data: params
   })
 }
+
+export function globalRefreshCache() {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/cache/refresh/global',
+    method: 'post'
+  })
+}
+
+export function apiRefreshCache(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/cache/refresh/api',
+    method: 'post',
+    data: params
+  })
+}
+

@@ -37,6 +37,7 @@
           @click="handleFilter"
         >查询</el-button>
         <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">新增</el-button>
+        <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="globalRefresh">全部刷新</el-button>
       </el-form-item>
     </el-form>
 
@@ -86,13 +87,14 @@
       <el-table-column
         label="操作"
         align="center"
-        width="230"
+        width="270"
         class-name="small-padding fixed-width"
         fixed="right"
       >
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" size="mini" icon="el-icon-refresh" @click="apiRefresh(row)">刷新</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -162,6 +164,8 @@ import {
   getGatewayCacheList,
   deleteGatewayCache,
   createGatewayCache,
+  globalRefreshCache,
+  apiRefreshCache,
   updateGatewayCache
 } from '@/api/cache'
 import Pagination from '@/components/Pagination'
@@ -364,6 +368,45 @@ export default {
           })
         }
         this.getList()
+      })
+    },
+    globalRefresh() {
+      globalRefreshCache().then(response => {
+        if (response.code === successCode) {
+          this.$notify({
+            title: '刷新全部',
+            message: '刷新全部成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: '刷新全部',
+            message: '刷新全部失败',
+            type: 'failure',
+            duration: 2000
+          })
+        }
+      })
+    },
+    apiRefresh(row) {
+      console.log(row.url)
+      apiRefreshCache(row).then(response => {
+        if (response.code === successCode) {
+          this.$notify({
+            title: '刷新',
+            message: '刷新成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: '刷新',
+            message: '刷新失败',
+            type: 'failure',
+            duration: 2000
+          })
+        }
       })
     },
     getSortClass: function(key) {
