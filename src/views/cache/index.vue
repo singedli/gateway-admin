@@ -85,12 +85,11 @@
             <el-button type="primary" size="mini" @click="handleDelete(row)">
               删除
             </el-button>
-
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :pageSizes="[1,2]" :page.sync="listQuery.current" :limit.sync="listQuery.size" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :pageSizes="[1,2,3,4]" :page.sync="listQuery.current" :limit.sync="listQuery.size" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
@@ -123,10 +122,10 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          Cancel
+          取消
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
+          确认
         </el-button>
       </div>
     </el-dialog>
@@ -144,6 +143,8 @@ const calendarTypeOptions = [
   { key: 1, display_name: '生效' },
   { key: 0, display_name: '失效' }
 ]
+
+const successCode = '00000000';
 
 export default {
   name: 'GatewayCacheTable',
@@ -189,7 +190,6 @@ export default {
         this.list = response.data.records
         this.total = response.data.total
         this.pages = response.data.pages
-        console.log(response.data.records)
         console.log(response)
       })
     },
@@ -220,13 +220,15 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: '',
-        type: ''
+        id: '',
+        name:'',
+        url: '',
+        backonUrl: '',
+        requestBodyd: '',
+        responseBody:'',
+        resultNum: '',
+        status: 1,
+        expireTime: ''
       }
     },
     handleCreate() {
@@ -243,6 +245,23 @@ export default {
           console.log(this.temp)
           createGatewayCache(this.temp).then(response => {
             console.log(response)
+            if(response.code == successCode){
+               this.$notify({
+                  title: '成功',
+                  message: '新增成功',
+                  type: 'success',
+                  duration: 2000
+               })
+            }else{
+              this.$notify({
+                  title: '失败',
+                  message: '新增失败',
+                  type: 'failure',
+                  duration: 2000
+               })
+            }
+            this.dialogFormVisible = false
+            this.getList()
           })
         }
       })
