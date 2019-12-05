@@ -15,7 +15,10 @@
       </el-form-item>
 
       <el-form-item label="状态:">
-        <el-input v-model="listQuery.status" placeholder="状态" />
+        <el-select v-model="listQuery.status" placeholder="状态">
+          <el-option label="生效" value=1 />
+          <el-option label="失效" value=0 />
+        </el-select>
       </el-form-item>
 
        <el-form-item label="最大缓存条目:">
@@ -25,18 +28,12 @@
        <el-form-item label="过期时间:">
         <el-input v-model="listQuery.expireTime" placeholder="过期时间" />
       </el-form-item>
-      <!-- <el-form-item label="活动区域">
-        <el-select v-model="formInline.region" placeholder="活动区域">
-          <el-option label="区域一" value="shanghai" />
-          <el-option label="区域二" value="beijing" />
-        </el-select>
-      </el-form-item> -->
+
       <el-form-item>
         <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-          查询
-          </el-button>
-
-        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+        查询
+        </el-button>
+        <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">
         新增
         </el-button>
       </el-form-item>
@@ -144,8 +141,8 @@ import { getGatewayCacheList , getGatewayCacheDetail,deleteGatewayCache,createGa
 import Pagination from '@/components/Pagination'
 
 const calendarTypeOptions = [
-  { key: "true", display_name: '生效' },
-  { key: "fasle" , display_name: '失效' }
+  { key: 1, display_name: '生效' },
+  { key: 0, display_name: '失效' }
 ]
 
 export default {
@@ -168,8 +165,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
        textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '修改接口缓存配置',
+        create: '新增接口缓存配置'
       },
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
@@ -196,11 +193,6 @@ export default {
         console.log(response)
       })
     },
-
-    handleSizeChange() {
-
-    },
-    handleCurrentChange() {},
     handleFilter() {
       this.listQuery.current = 1
       this.getList()
@@ -233,7 +225,7 @@ export default {
         remark: '',
         timestamp: new Date(),
         title: '',
-        status: 'published',
+        status: '',
         type: ''
       }
     },
@@ -258,7 +250,7 @@ export default {
     handleUpdate(row) {
       console.log(row.id)
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.temp.status = this.temp.status?1:0;
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -280,21 +272,6 @@ export default {
           deleteGatewayCache(row).then(response => {
             console.log(response)
           })
-    },
-    handleFetchPv(pv) {
-
-    },
-    handleDownload() {
-
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'createTime') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     },
     getSortClass: function(key) {
       const sort = this.listQuery.sort
