@@ -155,7 +155,7 @@ import {
   deleteMessageConverter,
   createMessageConverter,
   updateMessageConverter
-} from '@/api/cache'
+} from '@/api/messageConverter'
 import Pagination from '@/components/Pagination'
 
 const statusOptions = [
@@ -224,7 +224,7 @@ export default {
   },
   methods: {
     getList() {
-      getGatewayCacheList(this.listQuery).then(response => {
+      getMessageConverterList(this.listQuery).then(response => {
         this.listLoading = false
         this.list = response.data.records
         this.total = response.data.total
@@ -275,7 +275,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           console.log(this.temp)
-          createGatewayCache(this.temp).then(response => {
+          createMessageConverter(this.temp).then(response => {
             console.log(response)
             if (response.code === successCode) {
               this.$notify({
@@ -312,7 +312,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           console.log(this.temp.responseBody)
-          updateGatewayCache(this.temp).then(response => {
+          updateMessageConverter(this.temp).then(response => {
             console.log(response)
             if (response.code === successCode) {
               this.$notify({
@@ -337,7 +337,7 @@ export default {
     },
     handleDelete(row) {
       console.log(row.id)
-      deleteGatewayCache(row).then(response => {
+      deleteMessageConverter(row).then(response => {
         console.log(response)
         if (response.code === successCode) {
           this.$notify({
