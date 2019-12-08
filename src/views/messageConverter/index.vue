@@ -20,14 +20,6 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item label="最大缓存条目:">
-        <el-input v-model="listQuery.resultNum" placeholder="最大缓存条目" />
-      </el-form-item>
-
-      <el-form-item label="过期时间:">
-        <el-input v-model="listQuery.expireTime" placeholder="过期时间" />
-      </el-form-item>
-
       <el-form-item>
         <el-button
           v-waves
@@ -37,7 +29,6 @@
           @click="handleFilter"
         >查询</el-button>
         <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">新增</el-button>
-        <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="globalRefresh">全部刷新</el-button>
       </el-form-item>
     </el-form>
 
@@ -66,10 +57,10 @@
       <el-table-column label="名字" width="150px" align="center" prop="name" />
       <el-table-column label="URL" width="150px" align="center" prop="url" />
       <el-table-column label="后台URL" width="150px" align="center" prop="backonUrl" />
-      <el-table-column label="请求体配置" width="150px" align="center" prop="requestBody" />
-      <el-table-column label="响应体配置" width="150px" align="center" prop="responseBody" />
-      <el-table-column label="最大缓存条目" width="150px" align="center" prop="resultNum" />
-      <el-table-column label="过期时间" width="150px" align="center" prop="expireTime" />
+      <el-table-column label="请求报文配置" width="150px" align="center" prop="requestConfig" />
+      <el-table-column label="响应报文配置" width="150px" align="center" prop="responseConfig" />
+      <el-table-column label="请求报文格式配置" width="150px" align="center" prop="requestStruct" />
+      <el-table-column label="响应报文格式配置" width="150px" align="center" prop="responseStruct" />
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">{{ row.status ? "生效" : "失效" }}</template>
       </el-table-column>
@@ -94,7 +85,6 @@
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row)">删除</el-button>
-          <el-button type="primary" size="mini" icon="el-icon-refresh" @click="apiRefresh(row)">刷新</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -126,17 +116,17 @@
         <el-form-item label="后台URL" prop="backonUrl">
           <el-input v-model="temp.backonUrl" />
         </el-form-item>
-        <el-form-item label="请求体" prop="requestBody">
-          <el-input v-model="temp.requestBody" />
+        <el-form-item label="请求报文配置" prop="requestConfig">
+          <el-input v-model="temp.requestConfig" />
         </el-form-item>
-        <el-form-item label="响应体" prop="responseBody">
-          <el-input v-model="temp.responseBody" />
+        <el-form-item label="响应报文配置" prop="responseConfig">
+          <el-input v-model="temp.responseConfig" />
         </el-form-item>
-        <el-form-item label="最大缓存条目" prop="resultNum">
-          <el-input v-model="temp.resultNum" />
+        <el-form-item label="请求报文格式配置" prop="requestStruct">
+          <el-input v-model="temp.requestStruct" />
         </el-form-item>
-        <el-form-item label="过期时间" prop="expireTime">
-          <el-input v-model="temp.expireTime" />
+        <el-form-item label="响应报文格式配置" prop="responseStruct">
+          <el-input v-model="temp.responseStruct" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
@@ -161,12 +151,10 @@
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import {
-  getGatewayCacheList,
-  deleteGatewayCache,
-  createGatewayCache,
-  globalRefreshCache,
-  apiRefreshCache,
-  updateGatewayCache
+  getMessageConverterList,
+  deleteMessageConverter,
+  createMessageConverter,
+  updateMessageConverter
 } from '@/api/cache'
 import Pagination from '@/components/Pagination'
 
@@ -178,7 +166,7 @@ const statusOptions = [
 const successCode = '00000000'
 
 export default {
-  name: 'GatewayCacheTable',
+  name: 'MessageConverterTable',
   directives: { waves },
   components: { Pagination },
   filters: {},
@@ -195,8 +183,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改接口缓存配置',
-        create: '新增接口缓存配置'
+        update: '修改接口报文转换配置',
+        create: '新增接口报文转换配置'
       },
       rules: {
         name: [{ required: true, message: '名字必填', trigger: 'blur' }],
@@ -204,19 +192,18 @@ export default {
         backonUrl: [
           { required: true, message: '后台URL必填', trigger: 'blur' }
         ],
-        requestBody: [
-          { required: true, message: '请求体必填', trigger: 'blur' }
+        requestConfig: [
+          { required: true, message: '请求报文配置必填', trigger: 'blur' }
         ],
-        // resultNum: [
-        //   {
-        //     type: 'number',
-        //     message: '最大缓存条目必须为数字',
-        //     trigger: 'change'
-        //   }
-        // ],
-        // expireTime: [
-        //   { type: 'number', message: '过期时间必须为数字', trigger: 'change' }
-        // ]
+        responseConfig: [
+          { required: true, message: '响应报文配置必填', trigger: 'blur' }
+        ],
+        requestStruct: [
+          { required: true, message: '请求报文格式配置必填', trigger: 'blur' }
+        ],
+        responseStruct: [
+          { required: true, message: '响应报文格式配置必填', trigger: 'blur' }
+        ]
       },
       statusOptions,
       temp: {
@@ -224,11 +211,11 @@ export default {
         name: '',
         url: '',
         backonUrl: '',
-        requestBodyd: '',
-        responseBody: '',
-        resultNum: '',
-        status: 1,
-        expireTime: ''
+        requestConfig: '',
+        responseConfig: '',
+        requestStruct: '',
+        responseStruct: '',
+        status: 1
       }
     }
   },
@@ -269,11 +256,11 @@ export default {
         name: '',
         url: '',
         backonUrl: '',
-        requestBodyd: '',
-        responseBody: '',
-        resultNum: '',
-        status: 1,
-        expireTime: ''
+        requestConfig: '',
+        responseConfig: '',
+        requestStruct: '',
+        responseStruct: '',
+        status: 1
       }
     },
     handleCreate() {
@@ -368,45 +355,6 @@ export default {
           })
         }
         this.getList()
-      })
-    },
-    globalRefresh() {
-      globalRefreshCache().then(response => {
-        if (response.code === successCode) {
-          this.$notify({
-            title: '刷新全部',
-            message: '刷新全部成功',
-            type: 'success',
-            duration: 2000
-          })
-        } else {
-          this.$notify({
-            title: '刷新全部',
-            message: '刷新全部失败',
-            type: 'failure',
-            duration: 2000
-          })
-        }
-      })
-    },
-    apiRefresh(row) {
-      console.log(row.url)
-      apiRefreshCache(row).then(response => {
-        if (response.code === successCode) {
-          this.$notify({
-            title: '刷新',
-            message: '刷新成功',
-            type: 'success',
-            duration: 2000
-          })
-        } else {
-          this.$notify({
-            title: '刷新',
-            message: '刷新失败',
-            type: 'failure',
-            duration: 2000
-          })
-        }
       })
     },
     getSortClass: function(key) {

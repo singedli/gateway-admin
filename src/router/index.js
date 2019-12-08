@@ -44,6 +44,19 @@ export const constantRoutes = [
   },
 
   {
+    path: '/messageConverter',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'messageConverter',
+        component: () => import('@/views/messageConverter/index'),
+        meta: { title: '报文转换配置管理', icon: 'form' }
+      }
+    ]
+  },
+
+  {
     path: '/gatewayInterface',
     component: Layout,
     children: [
