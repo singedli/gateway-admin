@@ -57,10 +57,26 @@
       <el-table-column label="名字" width="150px" align="center" prop="name" />
       <el-table-column label="URL" width="150px" align="center" prop="url" />
       <el-table-column label="后台URL" width="150px" align="center" prop="backonUrl" />
-      <el-table-column label="请求报文配置" width="150px" align="center" prop="requestConfig" />
-      <el-table-column label="响应报文配置" width="150px" align="center" prop="responseConfig" />
-      <el-table-column label="请求报文格式配置" width="150px" align="center" prop="requestStruct" />
-      <el-table-column label="响应报文格式配置" width="150px" align="center" prop="responseStruct" />
+      <el-table-column show-overflow-tooltip="true" label="请求报文配置" width="150px" align="center" prop="requestConfig">
+        <template slot-scope="{row}">
+          <span height="10px" @click="handleDialog(row.requestConfig,'requestConfig')">{{ row.requestConfig }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="响应报文配置" width="150px" align="center" prop="responseConfig">
+        <template slot-scope="{row}">
+          <span height="150px" @click="handleDialog(row.responseConfig,'responseConfig')">{{ row.responseConfig }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="请求报文格式配置" width="150px" align="center" prop="requestStruct">
+        <template slot-scope="{row}">
+          <span height="150px" @click="handleDialog(row.requestStruct,'requestStruct')">{{ row.requestStruct }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="响应报文格式配置" width="150px" align="center" prop="responseStruct">
+        <template slot-scope="{row}">
+          <span height="10px" @click="handleDialog(row.responseStruct,'responseStruct')">{{ row.responseStruct }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">{{ row.status ? "生效" : "失效" }}</template>
       </el-table-column>
@@ -88,6 +104,10 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-dialog :title="textMap[dialogStatus]" width="70%" :visible.sync="dialogDataVisible">
+      <span>{{ dataShow }}</span>
+    </el-dialog>
 
     <pagination
       v-show="total>0"
@@ -180,11 +200,16 @@ export default {
         current: 1,
         size: 2
       },
+      dialogDataVisible: false,
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
         update: '修改接口报文转换配置',
-        create: '新增接口报文转换配置'
+        create: '新增接口报文转换配置',
+        requestConfig: '请求报文配置',
+        responseConfig: '响应报文配置',
+        requestStruct: '请求报文格式配置',
+        responseStruct: '响应报文格式配置'
       },
       rules: {
         name: [{ required: true, message: '名字必填', trigger: 'blur' }],
@@ -206,6 +231,7 @@ export default {
         ]
       },
       statusOptions,
+      dataShow: '',
       temp: {
         id: '',
         name: '',
@@ -360,6 +386,11 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : sort === `-${key}` ? 'descending' : ''
+    },
+    handleDialog: function(data, status) {
+      this.dataShow = data
+      this.dialogStatus = status
+      this.dialogDataVisible = true
     }
   }
 }
