@@ -66,11 +66,11 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
-        <template slot-scope="{row}"> 
+        <template slot-scope="{row}">
         <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
           <el-button type="primary" size="mini" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
-        </template> 
+        </template>
       </el-table-column>
     </el-table>
 
@@ -86,11 +86,11 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />  -->
-      <pagination v-show="total>0" 
-        :total="total" 
-        :pageSizes="[10,20,30,40]" 
-        :page.sync="listQuery.current" 
-        :limit.sync="listQuery.size" 
+      <pagination v-show="total>0"
+        :total="total"
+        :pageSizes="[10,20,30,40]"
+        :page.sync="listQuery.current"
+        :limit.sync="listQuery.size"
         @pagination="getList" />
     </div>
 
@@ -167,7 +167,7 @@ export default {
       systemData: [],
        calendarTypeOptions,
        temp: {
-        
+
       },
     }
   },
@@ -185,7 +185,7 @@ export default {
         console.log(response)
       })
     },
-     handleClearQueryParams() {
+    handleClearQueryParams() {
       this.listQuery = {}
     },
     handleFilter() {
@@ -248,7 +248,7 @@ export default {
       this.updateForm = interfaceConfig
       this.flag = 'update'
     },
-  
+
     handleDelete(id) {
       deleteById({ 'ids': id }).then(res => {
         if (res.code === '00000000') {
@@ -262,7 +262,7 @@ export default {
         }
       })
     },
-  
+
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
         if (j === 'createTime') {
