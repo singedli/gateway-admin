@@ -95,6 +95,20 @@ export const constantRoutes = [
     ]
   },
 
+  {
+    path: '/backon',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'backon',
+        component: () => import('@/views/backon/index'),
+        meta: { title: '后台系统配置', icon: 'form' }
+      }
+    ]
+  },
+
+
   { path: '*', redirect: '/404', hidden: true }
 ]
 

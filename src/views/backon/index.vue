@@ -1,20 +1,16 @@
 <template>
   <div class="app-container">
     <el-form :inline="true" :model="listQuery" class="form-inline">
-      <el-form-item label="需验证请求key">
-        <el-input v-model="listQuery.keyLimit" placeholder="需验证请求key" />
+      <el-form-item label="系统标识">
+        <el-input v-model="listQuery.system" placeholder="系统标识" />
       </el-form-item>
 
-      <el-form-item label="URL:">
-        <el-input v-model="listQuery.url" placeholder="URL" />
+      <el-form-item label="后台系统的域名或ip:">
+        <el-input v-model="listQuery.domain" placeholder="后台系统的域名或ip" />
       </el-form-item>
 
-       <el-form-item label="最大请求数:">
-        <el-input v-model="listQuery.maxCount" placeholder="最大请求数" />
-      </el-form-item>
-
-       <el-form-item label="单位时间:">
-        <el-input v-model="listQuery.timeUnit" placeholder="单位时间" />
+       <el-form-item label="描述信息:">
+        <el-input v-model="listQuery.description" placeholder="描述信息" />
       </el-form-item>
 
       <el-form-item label="状态:">
@@ -27,7 +23,7 @@
       <el-button type="primary" @click="getList">查询</el-button>
       <el-button type="primary" @click="handleClearQueryParams">清空</el-button>
       <el-form-item align="left">
-        <el-button type="primary" align="left" @click="handleCreateInterfaceConfig">新增接口配置</el-button>
+        <el-button type="primary" align="left" @click="handleCreateBackon">新增后台系统</el-button>
       </el-form-item>
     </el-form>
 
@@ -46,10 +42,12 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="URL" width="150px" align="center" prop="url" />
-      <el-table-column label="需验证请求key" width="150px" align="center" prop="keyLimit" />
-      <el-table-column label="最大请求次数" width="150px" align="center" prop="maxCount" />
-      <el-table-column label="单位时间" width="150px" align="center" prop="timeUnit" />
+      <el-table-column label="系统标识" width="150px" align="center" prop="system" />
+      <el-table-column label="后台系统的域名或ip" width="150px" align="center" prop="domain" />
+      <el-table-column label="后缀" width="150px" align="center" prop="suffix" />
+      <el-table-column label="描述信息" width="150px" align="center" prop="description" />
+      <el-table-column label="返回码键" width="150px" align="center" prop="successCode" />
+      <el-table-column label="表成功的返回值" width="150px" align="center" prop="successValue" />
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">
           {{ row.status ? '生效' : '失效' }}
@@ -94,23 +92,25 @@
         @pagination="getList" />
     </div>
 
-    <el-dialog title="网关接口防刷配置" :visible.sync="dialogCreateVisible" class="form-inline">
+    <el-dialog title="后台系统" :visible.sync="dialogCreateVisible" class="form-inline">
       <el-form :model="updateForm" label-width="20%">
-        <el-form-item label="URL:">
-          <el-input v-model="updateForm.url" autocomplete="off" label="url" />
+        <el-form-item label="系统标识:">
+          <el-input v-model="updateForm.system" autocomplete="off" label="系统标识" />
         </el-form-item>
-        <el-form-item label="需验证请求key">
-          <el-input v-model="updateForm.keyLimit" autocomplete="off" label="需验证请求key" />
+        <el-form-item label="后台系统的域名或ip">
+          <el-input v-model="updateForm.domain" autocomplete="off" label="后台系统的域名或ip" />
         </el-form-item>
-        <el-form-item label="单位时间">
-          <el-select v-model="updateForm.timeUnit" placeholder="单位时间">
-            <el-option label="时" value="H" />
-            <el-option label="分" value="M" />
-            <el-option label="秒" value="S" />
-          </el-select>
+        <el-form-item label="系统接口后缀">
+          <el-input v-model="updateForm.suffix" autocomplete="off" label="系统接口后缀" />
         </el-form-item>
-        <el-form-item label="最大请求次数">
-          <el-input v-model="updateForm.maxCount" autocomplete="off" label="最大请求次数" />
+        <el-form-item label="描述信息">
+          <el-input v-model="updateForm.description" autocomplete="off" label="描述信息" />
+        </el-form-item>
+        <el-form-item label="返回码键">
+          <el-input v-model="updateForm.successCode" autocomplete="off" label="返回码键" />
+        </el-form-item>
+        <el-form-item label="成功返回值">
+          <el-input v-model="updateForm.successValue" autocomplete="off" label="成功返回值" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
            <el-select v-model="updateForm.status" class="filter-item" placeholder="Please select">
@@ -130,7 +130,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import { getList,updateInterfaceConfig,queryByCondition,deleteById,createInterfaceConfig} from '@/api/limit'
+import { getList,updateBackon,deleteById,createBackon} from '@/api/backon'
 import Pagination from '@/components/Pagination'
 
 const calendarTypeOptions = [
@@ -158,11 +158,13 @@ export default {
       },
       dialogCreateVisible: false,
       updateForm: {
-        url: '',
-        status: '',
-        keylimit:'',
-        maxCount:'',
-        timeUnit:''
+        system: '',
+        domain: '',
+        suffix:'',
+        status:'',
+        description:'',
+        success_code:'',
+        success_value:''
       },
       systemData: [],
        calendarTypeOptions,
@@ -194,7 +196,7 @@ export default {
     },
     handleUpdateStatus(row) {
       row.status = !row.status
-      updateInterfaceConfig(row).then(res => {
+      updateBackon(row).then(res => {
         if (res.code === '00000000') {
           this.$notify({
             title: 'Success',
@@ -220,7 +222,7 @@ export default {
       }
       this.handleFilter()
     },
-    handleCreateInterfaceConfig() {
+    handleCreateBackon() {
       this.dialogCreateVisible = true
       this.updateForm = {}
       this.flag = 'create'
@@ -241,11 +243,11 @@ export default {
         }
       })
     },
-    handleUpdate(interfaceConfig) {
-      console.log(interfaceConfig.status);
-      interfaceConfig.status = interfaceConfig.status?1:0
+    handleUpdate(backon) {
+      console.log(backon.status);
+      backon.status = backon.status?1:0
       this.dialogCreateVisible = true
-      this.updateForm = interfaceConfig
+      this.updateForm = backon
       this.flag = 'update'
     },
   
@@ -283,11 +285,11 @@ export default {
      submitForm(flag) {
       this.dialogCreateVisible = false
       if (flag === 'create') {
-        createInterfaceConfig(this.updateForm).then(res => {
+        createBackon(this.updateForm).then(res => {
           if (res.code === '00000000') {
             this.$notify({
               title: 'Success',
-              message: '新增配置成功',
+              message: '新增后台系统成功',
               type: 'success',
               duration: 1000
             })
@@ -296,11 +298,11 @@ export default {
         })
       }
       if (flag === 'update') {
-        updateInterfaceConfig(this.updateForm).then(res => {
+        updateBackon(this.updateForm).then(res => {
           if (res.code === '00000000') {
             this.$notify({
               title: 'Success',
-              message: '修改配置成功',
+              message: '修改后台系统成功',
               type: 'success',
               duration: 1000
             })
