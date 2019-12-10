@@ -9,21 +9,14 @@
         <el-input v-model="listQuery.url" placeholder="URL" />
       </el-form-item>
 
-      <el-form-item label="所属系统:">
-        <el-input v-model="listQuery.system" placeholder="所属系统" />
+      <el-form-item label="后台接口URL:">
+        <el-input v-model="listQuery.backonUrl" placeholder="后台接口URL" />
       </el-form-item>
 
       <el-form-item label="状态:">
         <el-select v-model="listQuery.status" placeholder="状态">
           <el-option label="生效" value="1" />
           <el-option label="失效" value="0" />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="请求类型:">
-        <el-select v-model="listQuery.httpMethod" placeholder="请求类型">
-          <el-option label="GET" value="GET" />
-          <el-option label="POST" value="POST" />
         </el-select>
       </el-form-item>
 
@@ -63,10 +56,27 @@
       </el-table-column>
       <el-table-column label="名字" width="150px" align="center" prop="name" />
       <el-table-column label="URL" width="150px" align="center" prop="url" />
-      <el-table-column label="所属系统" width="150px" align="center" prop="system" />
-      <el-table-column label="请求类型" width="150px" align="center" prop="httpMethod" />
-      <el-table-column label="版本" width="150px" align="center" prop="version" />
-      <el-table-column label="头信息" width="150px" align="center" prop="httpHeader" />
+      <el-table-column label="后台URL" width="150px" align="center" prop="backonUrl" />
+      <el-table-column show-overflow-tooltip="true" label="请求报文配置" width="150px" align="center" prop="requestConfig">
+        <template slot-scope="{row}">
+          <span height="10px" @click="handleDialog(row.requestConfig,'requestConfig')">{{ row.requestConfig }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="响应报文配置" width="150px" align="center" prop="responseConfig">
+        <template slot-scope="{row}">
+          <span height="150px" @click="handleDialog(row.responseConfig,'responseConfig')">{{ row.responseConfig }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="请求报文格式配置" width="150px" align="center" prop="requestStruct">
+        <template slot-scope="{row}">
+          <span height="150px" @click="handleDialog(row.requestStruct,'requestStruct')">{{ row.requestStruct }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column show-overflow-tooltip="true" label="响应报文格式配置" width="150px" align="center" prop="responseStruct">
+        <template slot-scope="{row}">
+          <span height="10px" @click="handleDialog(row.responseStruct,'responseStruct')">{{ row.responseStruct }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">{{ row.status ? "生效" : "失效" }}</template>
       </el-table-column>
@@ -95,6 +105,10 @@
       </el-table-column>
     </el-table>
 
+    <el-dialog :title="textMap[dialogStatus]" width="70%" :visible.sync="dialogDataVisible">
+      <span>{{ dataShow }}</span>
+    </el-dialog>
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -119,21 +133,20 @@
         <el-form-item label="URL" prop="url">
           <el-input v-model="temp.url" />
         </el-form-item>
-        <el-form-item label="所属系统" prop="system">
-          <el-input v-model="temp.system" />
+        <el-form-item label="后台URL" prop="backonUrl">
+          <el-input v-model="temp.backonUrl" />
         </el-form-item>
-        <el-form-item label="请求类型" prop="httpMethod">
-          <el-select v-model="temp.httpMethod" class="filter-item" placeholder="Please select">
-            <el-option
-              v-for="item in httpMethodOptions"
-              :key="item.key"
-              :label="item.display_name"
-              :value="item.key"
-            />
-          </el-select>
+        <el-form-item label="请求报文配置" prop="requestConfig">
+          <el-input v-model="temp.requestConfig" />
         </el-form-item>
-        <el-form-item label="头信息" prop="httpHeader">
-          <el-input v-model="temp.httpHeader" />
+        <el-form-item label="响应报文配置" prop="responseConfig">
+          <el-input v-model="temp.responseConfig" />
+        </el-form-item>
+        <el-form-item label="请求报文格式配置" prop="requestStruct">
+          <el-input v-model="temp.requestStruct" />
+        </el-form-item>
+        <el-form-item label="响应报文格式配置" prop="responseStruct">
+          <el-input v-model="temp.responseStruct" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
@@ -158,17 +171,12 @@
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import {
-  getBackonInterfaceList,
-  deleteBackonInterface,
-  createBackonInterface,
-  updateBackonInterface
-} from '@/api/backonInterface'
+  getMessageConverterList,
+  deleteMessageConverter,
+  createMessageConverter,
+  updateMessageConverter
+} from '@/api/messageConverter'
 import Pagination from '@/components/Pagination'
-
-const httpMethodOptions = [
-  { key: 'GET', display_name: 'GET' },
-  { key: 'POST', display_name: 'POST' }
-]
 
 const statusOptions = [
   { key: 1, display_name: '生效' },
@@ -178,7 +186,7 @@ const statusOptions = [
 const successCode = '00000000'
 
 export default {
-  name: 'BackonInterfaceTable',
+  name: 'MessageConverterTable',
   directives: { waves },
   components: { Pagination },
   filters: {},
@@ -192,34 +200,47 @@ export default {
         current: 1,
         size: 2
       },
+      dialogDataVisible: false,
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改后台接口配置',
-        create: '新增后台接口配置'
+        update: '修改接口报文转换配置',
+        create: '新增接口报文转换配置',
+        requestConfig: '请求报文配置',
+        responseConfig: '响应报文配置',
+        requestStruct: '请求报文格式配置',
+        responseStruct: '响应报文格式配置'
       },
       rules: {
         name: [{ required: true, message: '名字必填', trigger: 'blur' }],
         url: [{ required: true, message: 'url必填', trigger: 'blur' }],
-        system: [
-          { required: true, message: '所属系统必填', trigger: 'blur' }
+        backonUrl: [
+          { required: true, message: '后台URL必填', trigger: 'blur' }
         ],
-        httpHeader: [
-          { required: true, message: '头信息必填', trigger: 'blur' }
+        requestConfig: [
+          { required: true, message: '请求报文配置必填', trigger: 'blur' }
         ],
-        httpMethod: [
-          { required: true, message: '请求类型必填', trigger: 'blur' }
+        responseConfig: [
+          { required: true, message: '响应报文配置必填', trigger: 'blur' }
+        ],
+        requestStruct: [
+          { required: true, message: '请求报文格式配置必填', trigger: 'blur' }
+        ],
+        responseStruct: [
+          { required: true, message: '响应报文格式配置必填', trigger: 'blur' }
         ]
       },
       statusOptions,
-      httpMethodOptions,
+      dataShow: '',
       temp: {
         id: '',
         name: '',
         url: '',
-        system: '',
-        httpMethod: '',
-        httpHeader: '',
+        backonUrl: '',
+        requestConfig: '',
+        responseConfig: '',
+        requestStruct: '',
+        responseStruct: '',
         status: 1
       }
     }
@@ -229,7 +250,7 @@ export default {
   },
   methods: {
     getList() {
-      getBackonInterfaceList(this.listQuery).then(response => {
+      getMessageConverterList(this.listQuery).then(response => {
         this.listLoading = false
         this.list = response.data.records
         this.total = response.data.total
@@ -260,9 +281,11 @@ export default {
         id: '',
         name: '',
         url: '',
-        system: '',
-        httpMethod: '',
-        httpHeader: '',
+        backonUrl: '',
+        requestConfig: '',
+        responseConfig: '',
+        requestStruct: '',
+        responseStruct: '',
         status: 1
       }
     },
@@ -278,7 +301,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           console.log(this.temp)
-          createBackonInterface(this.temp).then(response => {
+          createMessageConverter(this.temp).then(response => {
             console.log(response)
             if (response.code === successCode) {
               this.$notify({
@@ -315,7 +338,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           console.log(this.temp.responseBody)
-          updateBackonInterface(this.temp).then(response => {
+          updateMessageConverter(this.temp).then(response => {
             console.log(response)
             if (response.code === successCode) {
               this.$notify({
@@ -340,7 +363,7 @@ export default {
     },
     handleDelete(row) {
       console.log(row.id)
-      deleteBackonInterface(row).then(response => {
+      deleteMessageConverter(row).then(response => {
         console.log(response)
         if (response.code === successCode) {
           this.$notify({
@@ -363,6 +386,11 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : sort === `-${key}` ? 'descending' : ''
+    },
+    handleDialog: function(data, status) {
+      this.dataShow = data
+      this.dialogStatus = status
+      this.dialogDataVisible = true
     }
   }
 }

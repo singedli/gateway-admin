@@ -207,16 +207,16 @@ export default {
         requestBody: [
           { required: true, message: '请求体必填', trigger: 'blur' }
         ],
-        resultNum: [
-          {
-            type: 'number',
-            message: '最大缓存条目必须为数字',
-            trigger: 'change'
-          }
-        ],
-        expireTime: [
-          { type: 'number', message: '过期时间必须为数字', trigger: 'change' }
-        ]
+        // resultNum: [
+        //   {
+        //     type: 'number',
+        //     message: '最大缓存条目必须为数字',
+        //     trigger: 'change'
+        //   }
+        // ],
+        // expireTime: [
+        //   { type: 'number', message: '过期时间必须为数字', trigger: 'change' }
+        // ]
       },
       statusOptions,
       temp: {
