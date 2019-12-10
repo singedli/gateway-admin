@@ -54,3 +54,11 @@ export function updateMessageConverter(params) {
   })
 }
 
+export function messageConverterToTree(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/message/converter/tree',
+    method: 'post',
+    data: params
+  })
+}

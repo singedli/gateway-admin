@@ -125,7 +125,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import { getList, updateInterfaceConfig, queryByCondition, deleteById, createInterfaceConfig } from '@/api/limit'
+import { getList, updateInterfaceConfig, deleteById, createInterfaceConfig } from '@/api/limit'
 
 export default {
   name: 'ComplexTable',
