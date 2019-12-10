@@ -9,11 +9,11 @@
         <el-input v-model="listQuery.url" placeholder="URL" />
       </el-form-item>
 
-       <el-form-item label="最大请求数:">
+      <el-form-item label="最大请求数:">
         <el-input v-model="listQuery.maxCount" placeholder="最大请求数" />
       </el-form-item>
 
-       <el-form-item label="单位时间:">
+      <el-form-item label="单位时间:">
         <el-input v-model="listQuery.timeUnit" placeholder="单位时间" />
       </el-form-item>
 
@@ -66,11 +66,11 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
-        <template slot-scope="{row}"> 
-        <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
+        <template slot-scope="{row}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
           <el-button type="primary" size="mini" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
-        </template> 
+        </template>
       </el-table-column>
     </el-table>
 
@@ -108,8 +108,8 @@
         </el-form-item>
         <el-form-item label="状态:">
           <el-select v-model="updateForm.status" placeholder="请选择状态">
-            <el-option label="生效" value="true" />
-            <el-option label="失效" value="false" />
+            <el-option label="生效" value="1" />
+            <el-option label="失效" value="0" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -125,7 +125,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import { getList,updateInterfaceConfig,queryByCondition,deleteById,createInterfaceConfig} from '@/api/limit'
+import { getList, updateInterfaceConfig, queryByCondition, deleteById, createInterfaceConfig } from '@/api/limit'
 
 export default {
   name: 'ComplexTable',
@@ -133,7 +133,7 @@ export default {
   filters: {
 
   },
- data() {
+  data() {
     return {
       flag: '',
       list: null,
@@ -147,9 +147,9 @@ export default {
       updateForm: {
         url: '',
         status: '',
-        keylimit:'',
-        maxCount:'',
-        timeUnit:''
+        keylimit: '',
+        maxCount: '',
+        timeUnit: ''
       },
       systemData: []
     }
@@ -227,7 +227,7 @@ export default {
       this.updateForm = interfaceConfig
       this.flag = 'update'
     },
-  
+
     handleDelete(id) {
       deleteById({ 'ids': id }).then(res => {
         if (res.code === '00000000') {
@@ -241,7 +241,7 @@ export default {
         }
       })
     },
-  
+
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
         if (j === 'createTime') {
@@ -259,7 +259,7 @@ export default {
           ? 'descending'
           : ''
     },
-     submitForm(flag) {
+    submitForm(flag) {
       this.dialogCreateVisible = false
       if (flag === 'create') {
         createInterfaceConfig(this.updateForm).then(res => {

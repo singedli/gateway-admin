@@ -81,6 +81,30 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/serviceArrange',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'serviceArrange',
+        component: () => import('@/views/serviceArrange/index'),
+        meta: { title: '服务编排', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/jsonTree',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'jsonTree',
+        component: () => import('@/views/jsonTree/index'),
+        meta: { title: '树形json', icon: 'form' }
+      }
+    ]
+  },
 
   { path: '*', redirect: '/404', hidden: true }
 ]
