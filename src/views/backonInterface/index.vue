@@ -49,6 +49,11 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
+      <el-table-column v-if="showcheckedcol" label="选中" align="center">
+        <template slot-scope="scope">
+          <el-button type="primary" size="small" @click="handleCheckedInterface(scope.row)">选中</el-button>
+        </template>
+      </el-table-column>
       <el-table-column
         label="ID"
         prop="id"
@@ -98,7 +103,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :pageSizes="[1,2,3,4]"
+      :page-sizes="[1,2,3,4]"
       :page.sync="listQuery.current"
       :limit.sync="listQuery.size"
       @pagination="getList"
@@ -182,6 +187,7 @@ export default {
   directives: { waves },
   components: { Pagination },
   filters: {},
+  props: ['showcheckedcol'],
   data() {
     return {
       tableKey: 0,
@@ -222,6 +228,7 @@ export default {
         httpHeader: '',
         status: 1
       }
+      // showcheckedcol: false
     }
   },
   created() {
@@ -363,6 +370,9 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : sort === `-${key}` ? 'descending' : ''
+    },
+    handleCheckedInterface(item) {
+      this.$emit('selectedInterface', item)
     }
   }
 }

@@ -86,6 +86,8 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
           <el-button type="primary" size="mini" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
+          <el-button type="primary" size="mini" @click="arrangeService(row)">编排服务</el-button>
+
         </template>
       </el-table-column>
     </el-table>
@@ -273,14 +275,18 @@ export default {
         })
       }
     },
+    arrangeService(gatewayInterfaceparams) {
+      console.log(gatewayInterfaceparams)
+      this.getUrl('/arrange/index', gatewayInterfaceparams)
+    },
     handleSizeChange() {
 
     },
     handleCurrentChange() {
 
     },
-    getUrl(url) {
-      this.$router.push({ path: url })
+    getUrl(url, params) {
+      this.$router.push({ path: url, query: params })
     }
   }
 }

@@ -7,6 +7,8 @@
       default-expand-all
       node-key="id"
       highlight-current
+      check-on-click-node="true"
+      auto-expand-parent="false"
       :props="defaultProps"
     />
 
@@ -42,6 +44,7 @@ export default {
     },
     getCheckedNodes() {
       console.log(this.$refs.tree.getCheckedNodes())
+      console.log(this.$refs.tree.getHalfCheckedNodes())
     },
     getCheckedKeys() {
       console.log(this.$refs.tree.getCheckedKeys())

@@ -102,7 +102,7 @@ export const constantRoutes = [
         path: 'index',
         name: 'serviceArrange',
         component: () => import('@/views/serviceArrange/index'),
-        meta: { title: '服务编排', icon: 'form' }
+        meta: { title: 'react服务编排', icon: 'form' }
       }
     ]
   },
@@ -115,6 +115,30 @@ export const constantRoutes = [
         name: 'jsonTree',
         component: () => import('@/views/jsonTree/index'),
         meta: { title: '树形json', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/arrange',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'arrange',
+        component: () => import('@/views/arrange/index'),
+        meta: { title: '服务编排', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/ztree',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'arrange',
+        component: () => import('@/views/ztree/index'),
+        meta: { title: 'ztree', icon: 'form' }
       }
     ]
   },

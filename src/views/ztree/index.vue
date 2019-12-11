@@ -1,0 +1,103 @@
+<template>
+  <div class="app-container">
+    <div class="c">
+      <tree
+        :setting="setting"
+        :nodes="nodes"
+        @onClick="onClick"
+        @onCheck="onCheck"
+        @onCreated="handleCreated"
+      />
+    </div>
+  </div>
+</template>
+<script>
+import tree from 'vue-giant-tree'
+const simpleData =
+  [{ 'name': 'address', 'children': [{ 'name': 'country:中国' }, { 'name': 'city:江苏苏州' }, { 'name': 'street:科技园路.' }] }, { 'name': 'isNonProfit:true' }, { 'name': 'name:BeJson' }, { 'name': 'links', 'children': [{ 'name': '0', 'children': [{ 'name': 'name:Google' }, { 'name': 'url:http://www.google.com' }] }, { 'name': '1', 'children': [{ 'name': 'name:Baidu' }, { 'name': 'url:http://www.baidu.com' }] }, { 'name': '2', 'children': [{ 'name': 'name:SoSo' }, { 'name': 'url:http://www.SoSo.com' }] }] }, { 'name': 'page:88' }, { 'name': 'url:http://www.bejson.com' }]
+
+const dataQueue = [simpleData]
+export default {
+  name: 'App',
+  components: {
+    tree
+  },
+  data() {
+    return {
+      showIndex: 0,
+      ztreeObj: null,
+      setting: {
+        check: {
+          enable: true
+        },
+        data: {
+          simpleData: {
+            enable: true,
+            pIdKey: 'pid'
+          }
+        },
+        view: {
+          showIcon: false,
+          addHoverDom: this.addHoverDom,
+          removeHoverDom: this.removeHoverDom
+        }
+      }
+    }
+  },
+  computed: {
+    nodes: function() {
+      return dataQueue[this.showIndex]
+    }
+  },
+  methods: {
+    addHoverDom(treeid, treeNode) {
+      const item = document.getElementById(`${treeNode.tId}_a`)
+      if (item && !item.querySelector('.tree_extra_btn')) {
+        const btn = document.createElement('sapn')
+        btn.id = `${treeid}_${treeNode.id}_btn`
+        btn.classList.add('tree_extra_btn')
+        btn.innerText = '删除'
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          this.clickRemove(treeNode)
+        })
+        item.appendChild(btn)
+      }
+    },
+    removeHoverDom(treeid, treeNode) {
+      const item = document.getElementById(`${treeNode.tId}_a`)
+      if (item) {
+        const btn = item.querySelector('.tree_extra_btn')
+        if (btn) {
+          item.removeChild(btn)
+        }
+      }
+    },
+    clickRemove(treeNode) {
+      console.log('remove', treeNode)
+      this.ztreeObj && this.ztreeObj.removeNode(treeNode)
+    },
+    onClick: function(evt, treeId, treeNode) {
+      // 点击事件
+      // console.log(treeNode)
+      console.log(treeNode.parentTId)
+      // console.log(evt.type, treeNode)
+    },
+    onCheck: function(evt, treeId, treeNode) {
+      // 选中事件
+      console.log(evt.type, treeNode)
+      var pNode = treeNode.getParentNode()
+      console.log(pNode)
+    },
+    handleCreated: function(ztreeObj) {
+      this.ztreeObj = ztreeObj
+      // onCreated 中操作ztreeObj对象展开第一个节点
+      ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
+    },
+    update: function() {
+      // 更新示例数据
+      this.showIndex = this.showIndex === 0 ? 1 : 0
+    }
+  }
+}
+</script>
