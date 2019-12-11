@@ -17,8 +17,6 @@
       node-key="label"
       highlight-current
       :props="defaultProps"
-      @check="getCheckedKey"
-      @check-change="handleCheckChange"
     />
 
     <div class="buttons">
@@ -62,73 +60,69 @@ export default {
           })
         }
       })
+    }, 
+    childrenHandle(children,checkedKeys,checkedParam){
+        for(var j in children){
+            if(children[j].children !== undefined){
+               //alert(JSON.stringify(children[j]))//{"label":"0","children":[{"label":"name:Google"},{"label":"url:http://www.google.com"}
+               var next = checkedParam.children
+               next.push({label:children[j].label,children:[]})
+               var result = this.childrenHandle(children[j].children,checkedKeys,next[j])
+               checkedKeys = result.checkedKeys
+               checkedParam.children.push(result.checkedParam)
+               return {checkedKeys:checkedKeys,checkedParam:checkedParam}
+            }else{
+                var index = checkedKeys.indexOf(children[j].label)
+                if(index > -1){
+                  checkedParam.children.push({label:checkedKeys[index]})
+                  checkedKeys.splice(index, 1)
+                }
+            }           
+        }
+        return {checkedKeys:checkedKeys,checkedParam:checkedParam}
     },
     getCheckedNodes() {
-      // var keys = this.$refs.tree.getCheckedKeys()
-      // alert(JSON.stringify(keys))
-      // var halfNodes = this.$refs.tree.getHalfCheckedNodes();
-      // alert(JSON.stringify(halfNodes))
-      // for(var i in halfNodes){
-      //     var label = halfNodes[i].label
-      //     var children = halfNodes[i].children
-      //     for(var j in children){
-      //         alert(JSON.stringify(children[j]))          
-      //     }
-      // }
-
-      // var nodes = this.$refs.tree.getCheckedNodes();
-      // alert(JSON.stringify(nodes))
-      // for(var i in nodes){
-      //     var label = nodes[i].label
-      //     var key = label.split(':')[0]
-      //     alert(key)
-      // }
-      //var node = this.$refs.tree.getNode()
-      // alert(JSON.stringify(node.parent))
-      //alert(this.checked)
-       //var nodes = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()) 
-
-      // const checkedNodes = this.$refs.tree.getCheckedNodes(false, true)
-      // const checkedParam = []
-      // let index = -1
-      // if(checkedNodes.length !== 0) {
-      //    for(var i in checkedNodes){
-      //       var item = checkedNodes[i]
-      //       if (item.children !== undefined) {
-      //            index ++;
-      //            checkedParam[index] = {
-      //                label: item.label,
-      //                children: [],
-      //            }
-      //        } else {
-      //            checkedParam[index].children.push(item.label)
-      //        }
-      //     }
-      // }
-      //  alert(JSON.stringify(checkedParam))
-      var chkIds1 = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()) 
-      alert(JSON.stringify(chkIds1))
-    },
-    getCheckedKey(data, checked) {
-      // alert(data.label.split(":")[0])
-     // alert(JSON.stringify(checked))
-      var str ;
-      var checkedKeys = checked.halfCheckedKeys
-      for(var i in checkedKeys){
-          if(isNaN(checkedKeys[i])){
-              str = checkedKeys[i] + '.'
-          }
+      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      var checkedNodes = this.$refs.tree.getCheckedNodes(false, true)
+      alert(JSON.stringify(checkedNodes))
+      var checkedParams = []
+      if(checkedNodes.length !== 0) {
+         for(var i in checkedNodes){
+            if (checkedNodes[i].children !== undefined) {
+                var children = checkedNodes[i].children
+                var checkedParam = {
+                     label: checkedNodes[i].label,
+                     children: []
+                 }
+                var result = this.childrenHandle(children,checkedKeys,checkedParam)
+                checkedKeys = result.checkedKeys
+                checkedParams.push(result.checkedParam)
+                alert(JSON.stringify(checkedParams))
+            }
+         } 
+         for(var i in checkedKeys){
+              checkedParams.push({label:checkedKeys[i]})
+         }
       }
-      var value;
-      if(str){
-        value = str.replace(',','.') + data.label.split(":")[0]
-      }else{
-        value = data.label.split(":")[0]
-      }  
-      this.checked.push(value)
+      alert(JSON.stringify(checkedParams))
     }
-    // handleCheckChange(data, checked, indeterminate){
-    //    alert(JSON.stringify(data))
+    // getCheckedKey(data, checked) {
+    //   // alert(data.label.split(":")[0])
+    //  // alert(JSON.stringify(checked))
+    //   var str ;
+    //   var checkedKeys = checked.halfCheckedKeys
+    //   for(var i in checkedKeys){
+    //       if(isNaN(checkedKeys[i])){
+    //           str = checkedKeys[i] + '.'
+    //       }
+    //   }
+    //   var value;
+    //   if(str){
+    //     value = str.replace(',','.') + data.label.split(":")[0]
+    //   }else{
+    //     value = data.label.split(":")[0]
+    //   }  
+    //   this.checked.push(value)
     // }
   }
 }
