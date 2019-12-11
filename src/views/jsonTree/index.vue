@@ -1,11 +1,20 @@
 <template>
   <div class="app-container">
+
+    <el-input
+      v-model="textarea"
+      type="textarea"
+      :rows="15"
+      placeholder="请输入JSON"
+      @blur="loadData"
+    />
+
     <el-tree
       ref="tree"
       :data="data"
       show-checkbox
       default-expand-all
-      node-key="id"
+      node-key="label"
       highlight-current
       check-on-click-node="true"
       auto-expand-parent="false"
@@ -13,22 +22,24 @@
     />
 
     <div class="buttons">
-      <el-button @click="loadData">加载数据</el-button>
       <el-button @click="getCheckedNodes">通过 node 获取</el-button>
-      <el-button @click="getCheckedKeys">通过 key 获取</el-button>
-      <el-button @click="setCheckedNodes">通过 node 设置</el-button>
-      <el-button @click="setCheckedKeys">通过 key 设置</el-button>
-      <el-button @click="resetChecked">清空</el-button>
     </div>
 
   </div>
 </template>
 <script>
-export default {
+import waves from '@/directive/waves' // waves directive
+import { messageConverterToTree } from '@/api/messageConverter'
 
+const successCode = '00000000'
+
+export default {
+  directives: { waves },
   data() {
     return {
+      textarea: '',
       data: [],
+      checked: [],
       defaultProps: {
         children: 'children',
         label: 'label'
@@ -37,33 +48,84 @@ export default {
   },
   methods: {
     loadData() {
-      var dataStr = '[{"label":"address","children": [{"label":"country:中国"},{"label":"city:江苏苏州"},{"label":"street:科技园路."}]},{"label":"isNonProfit:true"},{"label":"name:BeJson"},{"label":"links","children": [{"label":"0","children":[{"label":"name:Google"},{"label":"url:http://www.google.com"}]},{"label":"1","children":[{"label":"name:Baidu"},{"label":"url:http://www.baidu.com"}]},{"label":"2","children":[{"label":"name:SoSo"},{"label":"url:http://www.SoSo.com"}]}]},{"label":"page:88"},{"label":"url:http://www.bejson.com"}]'
-      var json = JSON.parse(dataStr)
-      console.log(json)
-      this.data = json
+      var param = JSON.parse(this.textarea)
+      messageConverterToTree(param).then(response => {
+        if (response.code === successCode) {
+          var json = JSON.parse(response.data)
+          this.data = json
+        } else {
+          this.$notify({
+            title: '转换',
+            message: '转换失败',
+            type: 'failure',
+            duration: 2000
+          })
+        }
+      })
+    },
+    childrenHandle(children, checkedKeys, checkedParam) {
+      for (var j in children) {
+        if (children[j].children !== undefined) {
+          // alert(JSON.stringify(children[j]))//{"label":"0","children":[{"label":"name:Google"},{"label":"url:http://www.google.com"}
+          var next = checkedParam.children
+          next.push({ label: children[j].label, children: [] })
+          var result = this.childrenHandle(children[j].children, checkedKeys, next[j])
+          checkedKeys = result.checkedKeys
+          checkedParam.children.push(result.checkedParam)
+          return { checkedKeys: checkedKeys, checkedParam: checkedParam }
+        } else {
+          var index = checkedKeys.indexOf(children[j].label)
+          if (index > -1) {
+            checkedParam.children.push({ label: checkedKeys[index] })
+            checkedKeys.splice(index, 1)
+          }
+        }
+      }
+      return { checkedKeys: checkedKeys, checkedParam: checkedParam }
     },
     getCheckedNodes() {
-      console.log(this.$refs.tree.getCheckedNodes())
-      console.log(this.$refs.tree.getHalfCheckedNodes())
-    },
-    getCheckedKeys() {
-      console.log(this.$refs.tree.getCheckedKeys())
-    },
-    setCheckedNodes() {
-      this.$refs.tree.setCheckedNodes([{
-        id: 5,
-        label: '二级 2-1'
-      }, {
-        id: 9,
-        label: '三级 1-1-1'
-      }])
-    },
-    setCheckedKeys() {
-      this.$refs.tree.setCheckedKeys([3])
-    },
-    resetChecked() {
-      this.$refs.tree.setCheckedKeys([])
+      var checkedKeys = this.$refs.tree.getCheckedKeys()
+      var checkedNodes = this.$refs.tree.getCheckedNodes(false, true)
+      alert(JSON.stringify(checkedNodes))
+      var checkedParams = []
+      if (checkedNodes.length !== 0) {
+        for (var i in checkedNodes) {
+          if (checkedNodes[i].children !== undefined) {
+            var children = checkedNodes[i].children
+            var checkedParam = {
+              label: checkedNodes[i].label,
+              children: []
+            }
+            var result = this.childrenHandle(children, checkedKeys, checkedParam)
+            checkedKeys = result.checkedKeys
+            checkedParams.push(result.checkedParam)
+            alert(JSON.stringify(checkedParams))
+          }
+        }
+        for (var i in checkedKeys) {
+          checkedParams.push({ label: checkedKeys[i] })
+        }
+      }
+      alert(JSON.stringify(checkedParams))
     }
+    // getCheckedKey(data, checked) {
+    //   // alert(data.label.split(":")[0])
+    //  // alert(JSON.stringify(checked))
+    //   var str ;
+    //   var checkedKeys = checked.halfCheckedKeys
+    //   for(var i in checkedKeys){
+    //       if(isNaN(checkedKeys[i])){
+    //           str = checkedKeys[i] + '.'
+    //       }
+    //   }
+    //   var value;
+    //   if(str){
+    //     value = str.replace(',','.') + data.label.split(":")[0]
+    //   }else{
+    //     value = data.label.split(":")[0]
+    //   }
+    //   this.checked.push(value)
+    // }
   }
 }
 </script>
