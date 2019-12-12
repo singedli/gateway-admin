@@ -16,19 +16,18 @@
         @onCheck="onCheck"
         @onCreated="handleCreated"
       />
+
+       <div class="buttons">
+          <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+       </div>
   </div>
 </template>
 <script>
 import tree from 'vue-giant-tree'
-import waves from '@/directive/waves' // waves directive
 import { messageConverterToTree } from '@/api/messageConverter'
 
 const successCode = '00000000'
 
-var simpleData = []
-  // [{ 'name': 'address', 'children': [{ 'name': 'country:中国' }, { 'name': 'city:江苏苏州' }, { 'name': 'street:科技园路.' }] }, { 'name': 'isNonProfit:true' }, { 'name': 'name:BeJson' }, { 'name': 'links', 'children': [{ 'name': '0', 'children': [{ 'name': 'name:Google' }, { 'name': 'url:http://www.google.com' }] }, { 'name': '1', 'children': [{ 'name': 'name:Baidu' }, { 'name': 'url:http://www.baidu.com' }] }, { 'name': '2', 'children': [{ 'name': 'name:SoSo' }, { 'name': 'url:http://www.SoSo.com' }] }] }, { 'name': 'page:88' }, { 'name': 'url:http://www.bejson.com' }]
-
-const dataQueue = [simpleData]
 export default {
   name: 'App',
   components: {
@@ -39,6 +38,7 @@ export default {
       textarea: '',
       showIndex: 0,
       ztreeObj: null,
+      nodes: [],
       setting: {
         check: {
           enable: true
@@ -57,21 +57,13 @@ export default {
       }
     }
   },
-  computed: {
-    nodes: function() {
-      return dataQueue[this.showIndex]
-    }
-  },
   methods: {
     loadData() {
       var param = JSON.parse(this.textarea)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
-          // var json = JSON.parse(response.data)
-          // this.data = json
-          alert(JSON.stringify(response.data))
-          this.data.simpleData = response.data
-          
+          var json = JSON.parse(response.data)
+          this.nodes = json
         } else {
           this.$notify({
             title: '转换',
@@ -109,12 +101,18 @@ export default {
       console.log('remove', treeNode)
       this.ztreeObj && this.ztreeObj.removeNode(treeNode)
     },
-    onClick: function(evt, treeId, treeNode) {
-      // 点击事件
-      // console.log(treeNode)
-      console.log(treeNode.parentTId)
-      // console.log(evt.type, treeNode)
+    getCheckedNodes() {
+       alert(JSON.stringify(this.ztreeObj))
+       var selected = this.ztreeObj.getSelectedNodes()
+       alert(JSON.stringify(selected))
     },
+    // onClick: function(evt, treeId, treeNode) {
+    //   // 点击事件
+    //   // console.log(treeNode)
+    //   //console.log(treeNode.parentTId)
+    //   alert(JSON.stringify(treeNode))
+    //   // console.log(evt.type, treeNode)
+    // },
     onCheck: function(evt, treeId, treeNode) {
       // 选中事件
       console.log(evt.type, treeNode)
