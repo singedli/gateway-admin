@@ -12,7 +12,6 @@
       <tree
         :setting="setting"
         :nodes="nodes"
-        @onClick="onClick"
         @onCheck="onCheck"
         @onCreated="handleCreated"
       />
@@ -39,6 +38,7 @@ export default {
       showIndex: 0,
       ztreeObj: null,
       nodes: [],
+      selected:[],
       setting: {
         check: {
           enable: true
@@ -50,7 +50,7 @@ export default {
           }
         },
         view: {
-          showIcon: false,
+          showIcon: true,
           addHoverDom: this.addHoverDom,
           removeHoverDom: this.removeHoverDom
         }
@@ -102,9 +102,25 @@ export default {
       this.ztreeObj && this.ztreeObj.removeNode(treeNode)
     },
     getCheckedNodes() {
-       alert(JSON.stringify(this.ztreeObj))
-       var selected = this.ztreeObj.getSelectedNodes()
-       alert(JSON.stringify(selected))
+      alert(JSON.stringify(this.selected))
+       
+    },
+    handleParent(treeNode, pNode, pName) {
+      if(pNode.parentTId == null){
+          var name = pName +'.' + treeNode.name.split(":")[0]
+          if(treeNode.checked){
+            this.selected.push(name)
+          } else {
+            var index = this.selected.indexOf(name)
+            if (index > -1) {
+              this.selected.splice(index, 1)
+            }
+          }
+      } else {
+          var parentNode = pNode.getParentNode()
+          var parentName = parentNode.name + '.' + pName
+          this.handleParent(treeNode, parentNode, parentName)
+      }
     },
     // onClick: function(evt, treeId, treeNode) {
     //   // 点击事件
@@ -114,10 +130,21 @@ export default {
     //   // console.log(evt.type, treeNode)
     // },
     onCheck: function(evt, treeId, treeNode) {
-      // 选中事件
-      console.log(evt.type, treeNode)
-      var pNode = treeNode.getParentNode()
-      console.log(pNode)
+      if(treeNode.parentTId == null){
+          var name = treeNode.name.split(":")[0]
+          if(treeNode.checked){
+            this.selected.push(name)
+          } else {
+            var index = this.selected.indexOf(name)
+            if (index > -1) {
+              this.selected.splice(index, 1)
+            }
+          }
+      } else {
+          var pNode = treeNode.getParentNode()
+          var pName = pNode.name
+          this.handleParent(treeNode, pNode, pName)
+      }
     },
     handleCreated: function(ztreeObj) {
       this.ztreeObj = ztreeObj
