@@ -155,6 +155,18 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/echarts',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'echarts',
+        component: () => import('@/views/echartTest/index'),
+        meta: { title: 'echarts测试', icon: 'form' }
+      }
+    ]
+  },
 
 
   { path: '*', redirect: '/404', hidden: true }
