@@ -1,24 +1,52 @@
 <template>
   <div class="app-container">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="textarea"
+              type="textarea"
+              :rows="15"
+              placeholder="请输入JSON"
+              @blur="loadData"
+            />
 
-       <el-input
-          v-model="textarea"
-          type="textarea"
-          :rows="15"
-          placeholder="请输入JSON"
-          @blur="loadData"
-        />
+            <tree
+              :setting="setting"
+              :nodes="nodes"
+              @onCheck="onCheck"
+              @onCreated="handleCreated"
+            />
 
-      <tree
-        :setting="setting"
-        :nodes="nodes"
-        @onCheck="onCheck"
-        @onCreated="handleCreated"
-      />
+            <div class="buttons">
+                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="textarea"
+              type="textarea"
+              :rows="15"
+              placeholder="请输入JSON"
+              @blur="loadData"
+            />
 
-       <div class="buttons">
-          <el-button @click="getCheckedNodes">通过 node 获取</el-button>
-       </div>
+            <tree
+              :setting="setting"
+              :nodes="nodes"
+              @onCheck="onCheck"
+              @onCreated="handleCreated"
+            />
+
+            <div class="buttons">
+                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+     
   </div>
 </template>
 <script>
