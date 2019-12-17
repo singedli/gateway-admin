@@ -1,22 +1,60 @@
 <template>
   <div class="app-container">
-    <div class="c">
-      <tree
-        :setting="setting"
-        :nodes="nodes"
-        @onClick="onClick"
-        @onCheck="onCheck"
-        @onCreated="handleCreated"
-      />
-    </div>
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="textarea"
+              type="textarea"
+              :rows="15"
+              placeholder="请输入JSON"
+              @blur="loadData"
+            />
+
+            <tree
+              :setting="setting"
+              :nodes="nodes"
+              @onCheck="onCheck"
+              @onCreated="handleCreated"
+            />
+
+            <div class="buttons">
+                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="textarea"
+              type="textarea"
+              :rows="15"
+              placeholder="请输入JSON"
+              @blur="loadData"
+            />
+
+            <tree
+              :setting="setting"
+              :nodes="nodes"
+              @onCheck="onCheck"
+              @onCreated="handleCreated"
+            />
+
+            <div class="buttons">
+                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+     
   </div>
 </template>
 <script>
 import tree from 'vue-giant-tree'
-const simpleData =
-  [{ 'name': 'address', 'children': [{ 'name': 'country:中国' }, { 'name': 'city:江苏苏州' }, { 'name': 'street:科技园路.' }] }, { 'name': 'isNonProfit:true' }, { 'name': 'name:BeJson' }, { 'name': 'links', 'children': [{ 'name': '0', 'children': [{ 'name': 'name:Google' }, { 'name': 'url:http://www.google.com' }] }, { 'name': '1', 'children': [{ 'name': 'name:Baidu' }, { 'name': 'url:http://www.baidu.com' }] }, { 'name': '2', 'children': [{ 'name': 'name:SoSo' }, { 'name': 'url:http://www.SoSo.com' }] }] }, { 'name': 'page:88' }, { 'name': 'url:http://www.bejson.com' }]
+import { messageConverterToTree } from '@/api/messageConverter'
 
-const dataQueue = [simpleData]
+const successCode = '00000000'
+
 export default {
   name: 'App',
   components: {
@@ -24,8 +62,11 @@ export default {
   },
   data() {
     return {
+      textarea: '',
       showIndex: 0,
       ztreeObj: null,
+      nodes: [],
+      selected:[],
       setting: {
         check: {
           enable: true
@@ -37,19 +78,30 @@ export default {
           }
         },
         view: {
-          showIcon: false,
+          showIcon: true,
           addHoverDom: this.addHoverDom,
           removeHoverDom: this.removeHoverDom
         }
       }
     }
   },
-  computed: {
-    nodes: function() {
-      return dataQueue[this.showIndex]
-    }
-  },
   methods: {
+    loadData() {
+      var param = JSON.parse(this.textarea)
+      messageConverterToTree(param).then(response => {
+        if (response.code === successCode) {
+          var json = JSON.parse(response.data)
+          this.nodes = json
+        } else {
+          this.$notify({
+            title: '转换',
+            message: '转换失败',
+            type: 'failure',
+            duration: 2000
+          })
+        }
+      })
+    },
     addHoverDom(treeid, treeNode) {
       const item = document.getElementById(`${treeNode.tId}_a`)
       if (item && !item.querySelector('.tree_extra_btn')) {
@@ -77,17 +129,50 @@ export default {
       console.log('remove', treeNode)
       this.ztreeObj && this.ztreeObj.removeNode(treeNode)
     },
-    onClick: function(evt, treeId, treeNode) {
-      // 点击事件
-      // console.log(treeNode)
-      console.log(treeNode.parentTId)
-      // console.log(evt.type, treeNode)
+    getCheckedNodes() {
+      alert(JSON.stringify(this.selected))
+       
     },
+    handleParent(treeNode, pNode, pName) {
+      if(pNode.parentTId == null){
+          var name = pName +'.' + treeNode.name.split(":")[0]
+          if(treeNode.checked){
+            this.selected.push(name)
+          } else {
+            var index = this.selected.indexOf(name)
+            if (index > -1) {
+              this.selected.splice(index, 1)
+            }
+          }
+      } else {
+          var parentNode = pNode.getParentNode()
+          var parentName = parentNode.name + '.' + pName
+          this.handleParent(treeNode, parentNode, parentName)
+      }
+    },
+    // onClick: function(evt, treeId, treeNode) {
+    //   // 点击事件
+    //   // console.log(treeNode)
+    //   //console.log(treeNode.parentTId)
+    //   alert(JSON.stringify(treeNode))
+    //   // console.log(evt.type, treeNode)
+    // },
     onCheck: function(evt, treeId, treeNode) {
-      // 选中事件
-      console.log(evt.type, treeNode)
-      var pNode = treeNode.getParentNode()
-      console.log(pNode)
+      if(treeNode.parentTId == null){
+          var name = treeNode.name.split(":")[0]
+          if(treeNode.checked){
+            this.selected.push(name)
+          } else {
+            var index = this.selected.indexOf(name)
+            if (index > -1) {
+              this.selected.splice(index, 1)
+            }
+          }
+      } else {
+          var pNode = treeNode.getParentNode()
+          var pName = pNode.name
+          this.handleParent(treeNode, pNode, pName)
+      }
     },
     handleCreated: function(ztreeObj) {
       this.ztreeObj = ztreeObj
