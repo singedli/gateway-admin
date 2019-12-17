@@ -64,7 +64,7 @@
       <el-table-column label="系统" width="150px" align="center" prop="system" />
       <el-table-column label="前置拦截器" width="150px" align="center" prop="preInterceptors" />
       <el-table-column label="后置拦截器" width="150px" align="center" prop="postInterceptors" />
-      <el-table-column label="调用配置" width="150px" align="center" prop="invokeConfig" />
+      <el-table-column show-overflow-tooltip="true" label="调用配置" width="150px" align="center" prop="invokeConfig" />
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">
           {{ row.status ? '生效' : '失效' }}
