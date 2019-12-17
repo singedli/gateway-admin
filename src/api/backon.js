@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//分页查询
+// 分页查询
 export function getList(params) {
   return request({
     baseURL: 'http://localhost:9000/gateway',
@@ -10,8 +10,7 @@ export function getList(params) {
   })
 }
 
-
-//根据id修改
+// 根据id修改
 export function updateBackon(params) {
   return request({
     baseURL: 'http://localhost:9000/gateway',
@@ -21,8 +20,7 @@ export function updateBackon(params) {
   })
 }
 
-
-//添加
+// 添加
 export function createBackon(params) {
   return request({
     baseURL: 'http://localhost:9000/gateway',
@@ -32,7 +30,7 @@ export function createBackon(params) {
   })
 }
 
-//根据id删除
+// 根据id删除
 export function deleteById(params) {
   return request({
     baseURL: 'http://localhost:9000/gateway',

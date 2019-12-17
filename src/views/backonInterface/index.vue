@@ -103,7 +103,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page-sizes="[1,2,3,4]"
+      :page-sizes="[5,10,20,30]"
       :page.sync="listQuery.current"
       :limit.sync="listQuery.size"
       @pagination="getList"
@@ -196,7 +196,7 @@ export default {
       listLoading: true,
       listQuery: {
         current: 1,
-        size: 2
+        size: 10
       },
       dialogFormVisible: false,
       dialogStatus: '',

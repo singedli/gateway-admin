@@ -155,7 +155,18 @@ export const constantRoutes = [
       }
     ]
   },
-
+  {
+    path: '/workflow',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'backon',
+        component: () => import('@/views/workflow/index'),
+        meta: { title: 'workflow', icon: 'form' }
+      }
+    ]
+  },
 
   { path: '*', redirect: '/404', hidden: true }
 ]

@@ -83,6 +83,7 @@ export default {
       // 遍历列表判断当前元素在数组中是否已经存在
       console.log(this.tasks)
       console.log(JSON.stringify(this.tasks))
+      console.log(JSON.stringify(this.routerParams))
     },
     dismissConverterDialog(item) {
       item.type = 'converter'

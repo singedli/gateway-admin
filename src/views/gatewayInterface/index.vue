@@ -64,7 +64,11 @@
       <el-table-column label="系统" width="150px" align="center" prop="system" />
       <el-table-column label="前置拦截器" width="150px" align="center" prop="preInterceptors" />
       <el-table-column label="后置拦截器" width="150px" align="center" prop="postInterceptors" />
-      <el-table-column label="调用配置" width="150px" align="center" prop="invokeConfig" />
+      <el-table-column label="调用配置" width="150px" align="center" prop="invokeConfig">
+        <template slot-scope="{row}">
+          <span height="150px" @click="handleDialog(row.invokeConfig,'invokeConfig')">{{ row.invokeConfig }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">
           {{ row.status ? '生效' : '失效' }}
@@ -188,13 +192,21 @@ export default {
         postInterceptors: '',
         invokeConfig: ''
       },
-      systemData: []
+      systemData: [],
+      dataShow: '',
+      dialogStatus: '',
+      dialogDataVisible: false
     }
   },
   created() {
     this.getList()
   },
   methods: {
+    handleDialog: function(data, status) {
+      this.dataShow = data
+      this.dialogStatus = status
+      this.dialogDataVisible = true
+    },
     getList() {
       getList(this.listQuery).then(response => {
         this.listLoading = false
@@ -277,7 +289,7 @@ export default {
     },
     arrangeService(gatewayInterfaceparams) {
       console.log(gatewayInterfaceparams)
-      this.getUrl('/arrange/index', gatewayInterfaceparams)
+      this.getUrl('/workflow/index', gatewayInterfaceparams)
     },
     handleSizeChange() {
 
