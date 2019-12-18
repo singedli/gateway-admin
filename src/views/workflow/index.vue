@@ -32,6 +32,7 @@ import VGEditor, { Flow } from 'vg-editor'
 import backonInterface from '@/views/backonInterface/index'
 import jsonConverter from '@/views/messageConverter/index'
 import { addServiceArrange } from '@/api/serviceArrange'
+// import { getGatewayInterfaceById } from '@/api/gatewayInterface'
 
 const successCode = '00000000'
 export default {
@@ -40,8 +41,6 @@ export default {
   data() {
     return {
       routerParams: {},
-      // taskForm: {},
-      // tasks: [],
       showQueryBackonInterfaceDialog: false,
       showQueryJsonConverterDialog: false,
       stateMachineJson: {},
@@ -64,11 +63,10 @@ export default {
       }
     }
   },
-  mounted() {
-
-  },
   created() {
-    this.getRouterParams()
+    var flowConfig = JSON.parse(this.$route.query.flowConfig)
+    this.data.nodes = flowConfig.nodes
+    this.data.edges = flowConfig.edges
   },
   methods: {
     openAddStartDialog() {
@@ -145,7 +143,7 @@ export default {
       var saveParams = {
         nodes: this.getDataNodes(),
         edges: this.$refs.vgEditor.propsAPI.save().edges,
-        gatewayInterface: this.routerParams
+        gatewayInterface: this.$route.query
       }
       console.log(JSON.stringify(saveParams))
       addServiceArrange(saveParams).then((response) => {
@@ -175,7 +173,6 @@ export default {
       return this.getDataNodes()[this.getDataNodes().length - 1].y
     },
     getRouterParams() {
-      console.log(this.$route)
       this.routerParams = this.$route.query
     },
     dismissDialog(item) {
