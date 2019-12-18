@@ -39,3 +39,12 @@ export function deleteById(params) {
     data: params
   })
 }
+
+export function getAllSystem() {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/backon/getAllSystem',
+    method: 'post'
+  })
+}
+

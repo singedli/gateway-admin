@@ -125,7 +125,14 @@
           <el-input v-model="temp.url" />
         </el-form-item>
         <el-form-item label="所属系统" prop="system">
-          <el-input v-model="temp.system" />
+          <el-select v-model="temp.system" class="filter-item" placeholder="Please select">
+            <el-option
+              v-for="item in systemOptions"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="请求类型" prop="httpMethod">
           <el-select v-model="temp.httpMethod" class="filter-item" placeholder="Please select">
@@ -168,6 +175,7 @@ import {
   createBackonInterface,
   updateBackonInterface
 } from '@/api/backonInterface'
+import { getAllSystem } from '@/api/backon'
 import Pagination from '@/components/Pagination'
 
 const httpMethodOptions = [
@@ -204,14 +212,12 @@ export default {
         update: '修改后台接口配置',
         create: '新增后台接口配置'
       },
+      systemOptions: [],
       rules: {
         name: [{ required: true, message: '名字必填', trigger: 'blur' }],
         url: [{ required: true, message: 'url必填', trigger: 'blur' }],
         system: [
           { required: true, message: '所属系统必填', trigger: 'blur' }
-        ],
-        httpHeader: [
-          { required: true, message: '头信息必填', trigger: 'blur' }
         ],
         httpMethod: [
           { required: true, message: '请求类型必填', trigger: 'blur' }
@@ -233,6 +239,7 @@ export default {
   },
   created() {
     this.getList()
+    this.getSystem()
   },
   methods: {
     getList() {
@@ -242,6 +249,15 @@ export default {
         this.total = response.data.total
         this.pages = response.data.pages
         console.log(response)
+      })
+    },
+    getSystem() {
+      getAllSystem().then(response => {
+        var systems = response.data
+        for (var i in systems) {
+          var system = systems[i]
+          this.systemOptions.push({ key: system, display_name: system })
+        }
       })
     },
     handleFilter() {
