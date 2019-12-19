@@ -1,47 +1,63 @@
 <template>
   <div class="app-container">
       <el-row :gutter="20">
-        <el-col :span="6">
+        <el-col :span="12">
           <div class="grid-content bg-purple">
             <el-input
-              v-model="textarea"
+              v-model="jsonIn"
               type="textarea"
-              :rows="15"
+              :rows="20"
               placeholder="请输入JSON"
               @blur="loadData"
             />
-
-            <tree
-              :setting="setting"
-              :nodes="nodes"
-              @onCheck="onCheck"
-              @onCreated="handleCreated"
+          </div>
+        </el-col>
+        <el-col :span="12">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="jsonOut"
+              type="textarea"
+              :rows="20"
+              placeholder="请输入JSON"
+              @blur="loadData"
             />
-
+          </div>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <div class="grid-content bg-purple">
+            <tree
+                :setting="setting"
+                :nodes="nodesIn"
+                @onCheck="onCheck"
+                @onCreated="handleCreated"
+              />
+          </div>
+        </el-col>
+        <el-col :span="12">
+          <div class="grid-content bg-purple">
+            <tree
+                :setting="setting"
+                :nodes="nodesOut"
+                @onCheck="onCheck"
+                @onCreated="handleCreated"
+              />
+          </div>
+        </el-col>
+      </el-row>
+       <el-row :gutter="20">
+        <el-col :span="12">
+          <div class="grid-content bg-purple">
             <div class="buttons">
                 <el-button @click="getCheckedNodes">通过 node 获取</el-button>
             </div>
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="12">
           <div class="grid-content bg-purple">
-            <el-input
-              v-model="textarea"
-              type="textarea"
-              :rows="15"
-              placeholder="请输入JSON"
-              @blur="loadData"
-            />
-
-            <tree
-              :setting="setting"
-              :nodes="nodes"
-              @onCheck="onCheck"
-              @onCreated="handleCreated"
-            />
-
             <div class="buttons">
-                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+                <el-button @click="getJson">通过 node 获取json</el-button>
             </div>
           </div>
         </el-col>
@@ -61,10 +77,12 @@ export default {
   },
   data() {
     return {
-      textarea: '',
+      jsonIn: '',
+      jsonOut: '',
       showIndex: 0,
       ztreeObj: null,
-      nodes: [],
+      nodesIn: [],
+      nodesOut: [],
       selected: [],
       setting: {
         check: {
@@ -79,28 +97,37 @@ export default {
         edit: {
           enable: true,
           drag: {
-            isMove: true,
+            isMove: false,
             isCopy: true,
             prev: true,
             inner: true,
             next: true
-          }
+          },
+          removeTitle: '删除节点',
+          renameTitle: '编辑节点名称',
+          showRenameBtn: true,
+          showRemoveBtn: true
         },
         view: {
           showIcon: true,
           addHoverDom: this.addHoverDom,
           removeHoverDom: this.removeHoverDom
+        },
+        callback: {
+          onDrag: this.zTreeOnDrag,
+          onDrop: this.zTreeOnDrop
         }
       }
     }
   },
   methods: {
     loadData() {
-      var param = JSON.parse(this.textarea)
+      var param = JSON.parse(this.jsonIn)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
           var json = JSON.parse(response.data)
-          this.nodes = json
+          this.nodesIn = json
+          this.nodesOut = [{}]
         } else {
           this.$notify({
             title: '转换',
@@ -140,6 +167,15 @@ export default {
     },
     getCheckedNodes() {
       alert(JSON.stringify(this.selected))
+    },
+    getJson() {
+      this.jsonOut = JSON.stringify(this.nodesOut)
+    },
+    zTreeOnDrag(event, treeId, treeNodes) {
+      alert(treeNodes.length)
+    },
+    zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+      alert(treeNodes.length + ',' + (targetNode ? (targetNode.tId + ',' + targetNode.name) : 'isRoot'))
     },
     handleParent(treeNode, pNode, pName) {
       if (pNode.parentTId == null) {
