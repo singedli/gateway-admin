@@ -8,7 +8,7 @@
               type="textarea"
               :rows="20"
               placeholder="请输入JSON"
-              @blur="loadData"
+              @blur="loadDataRight"
             />
           </div>
         </el-col>
@@ -19,7 +19,7 @@
               type="textarea"
               :rows="20"
               placeholder="请输入JSON"
-              @blur="loadData"
+              @blur="loadDataLeft"
             />
           </div>
         </el-col>
@@ -84,6 +84,7 @@ export default {
       nodesIn: [],
       nodesOut: [],
       selected: [],
+      draged: [],
       setting: {
         check: {
           enable: true
@@ -121,13 +122,28 @@ export default {
     }
   },
   methods: {
-    loadData() {
+    loadDataRight() {
       var param = JSON.parse(this.jsonIn)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
           var json = JSON.parse(response.data)
           this.nodesIn = json
-          this.nodesOut = [{}]
+        } else {
+          this.$notify({
+            title: '转换',
+            message: '转换失败',
+            type: 'failure',
+            duration: 2000
+          })
+        }
+      })
+    },
+    loadDataLeft() {
+      var param = JSON.parse(this.jsonOut)
+      messageConverterToTree(param).then(response => {
+        if (response.code === successCode) {
+          var json = JSON.parse(response.data)
+          this.nodesOut = json
         } else {
           this.$notify({
             title: '转换',
@@ -169,13 +185,27 @@ export default {
       alert(JSON.stringify(this.selected))
     },
     getJson() {
-      this.jsonOut = JSON.stringify(this.nodesOut)
+      //alert(JSON.stringify(this.jsonOut))
+      alert(JSON.stringify(this.draged))
     },
     zTreeOnDrag(event, treeId, treeNodes) {
-      alert(treeNodes.length)
+  // alert(treeNodes.length)
     },
     zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
-      alert(treeNodes.length + ',' + (targetNode ? (targetNode.tId + ',' + targetNode.name) : 'isRoot'))
+      if ( moveType === 'inner') {
+        if ( targetNode != null) {
+          var treeName = treeNodes[0].name
+          var targetName = targetNode.name
+          console.log(targetNode.getParentNode())
+          console.log(targetNode.getIndex())
+          this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+          this.ztreeObj.removeNode(targetNode)
+          var node = treeName+'='+targetName
+          alert(node)   
+        }
+        console.log(treeNodes)
+        console.log(targetNode)
+      }
     },
     handleParent(treeNode, pNode, pName) {
       if (pNode.parentTId == null) {
