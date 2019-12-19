@@ -46,7 +46,6 @@
           </div>
         </el-col>
       </el-row>
-     
   </div>
 </template>
 <script>
@@ -66,7 +65,7 @@ export default {
       showIndex: 0,
       ztreeObj: null,
       nodes: [],
-      selected:[],
+      selected: [],
       setting: {
         check: {
           enable: true
@@ -75,6 +74,16 @@ export default {
           simpleData: {
             enable: true,
             pIdKey: 'pid'
+          }
+        },
+        edit: {
+          enable: true,
+          drag: {
+            isMove: true,
+            isCopy: true,
+            prev: true,
+            inner: true,
+            next: true
           }
         },
         view: {
@@ -131,23 +140,22 @@ export default {
     },
     getCheckedNodes() {
       alert(JSON.stringify(this.selected))
-       
     },
     handleParent(treeNode, pNode, pName) {
-      if(pNode.parentTId == null){
-          var name = pName +'.' + treeNode.name.split(":")[0]
-          if(treeNode.checked){
-            this.selected.push(name)
-          } else {
-            var index = this.selected.indexOf(name)
-            if (index > -1) {
-              this.selected.splice(index, 1)
-            }
+      if (pNode.parentTId == null) {
+        var name = pName + '.' + treeNode.name.split(':')[0]
+        if (treeNode.checked) {
+          this.selected.push(name)
+        } else {
+          var index = this.selected.indexOf(name)
+          if (index > -1) {
+            this.selected.splice(index, 1)
           }
+        }
       } else {
-          var parentNode = pNode.getParentNode()
-          var parentName = parentNode.name + '.' + pName
-          this.handleParent(treeNode, parentNode, parentName)
+        var parentNode = pNode.getParentNode()
+        var parentName = parentNode.name + '.' + pName
+        this.handleParent(treeNode, parentNode, parentName)
       }
     },
     // onClick: function(evt, treeId, treeNode) {
@@ -158,20 +166,20 @@ export default {
     //   // console.log(evt.type, treeNode)
     // },
     onCheck: function(evt, treeId, treeNode) {
-      if(treeNode.parentTId == null){
-          var name = treeNode.name.split(":")[0]
-          if(treeNode.checked){
-            this.selected.push(name)
-          } else {
-            var index = this.selected.indexOf(name)
-            if (index > -1) {
-              this.selected.splice(index, 1)
-            }
+      if (treeNode.parentTId == null) {
+        var name = treeNode.name.split(':')[0]
+        if (treeNode.checked) {
+          this.selected.push(name)
+        } else {
+          var index = this.selected.indexOf(name)
+          if (index > -1) {
+            this.selected.splice(index, 1)
           }
+        }
       } else {
-          var pNode = treeNode.getParentNode()
-          var pName = pNode.name
-          this.handleParent(treeNode, pNode, pName)
+        var pNode = treeNode.getParentNode()
+        var pName = pNode.name
+        this.handleParent(treeNode, pNode, pName)
       }
     },
     handleCreated: function(ztreeObj) {
