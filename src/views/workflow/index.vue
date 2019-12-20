@@ -32,7 +32,7 @@ import VGEditor, { Flow } from 'vg-editor'
 import backonInterface from '@/views/backonInterface/index'
 import jsonConverter from '@/views/messageConverter/index'
 import { addServiceArrange } from '@/api/serviceArrange'
-// import { getGatewayInterfaceById } from '@/api/gatewayInterface'
+import { getBackonInterfacesByUrl } from '@/api/backonInterface'
 
 const successCode = '00000000'
 export default {
@@ -45,7 +45,7 @@ export default {
       showQueryJsonConverterDialog: false,
       stateMachineJson: {},
       data: {
-        index: 0,
+        index: 1,
         nodes: [
           {
             type: 'node',
@@ -64,11 +64,42 @@ export default {
     }
   },
   created() {
-    var flowConfig = JSON.parse(this.$route.query.flowConfig)
-    this.data.nodes = flowConfig.nodes
-    this.data.edges = flowConfig.edges
+    this.initData()
   },
   methods: {
+    async initData() {
+      if (this.$route.query.flowConfig) {
+        var flowConfig = JSON.parse(this.$route.query.flowConfig)
+        this.data.nodes = flowConfig.nodes
+        this.data.edges = flowConfig.edges
+      } else {
+        if (this.$route.query.backonUrl) {
+          var backonUrlList = JSON.parse(this.$route.query.backonUrl)
+          console.log(backonUrlList)
+          for (var i = 0; i < backonUrlList.length; i++) {
+            var system = backonUrlList[i].system
+            var backonUrl = backonUrlList[i].backonUrl
+            var node = {
+              type: 'node',
+              size: '200*80',
+              shape: 'flow-rect',
+              color: '#FA8C16',
+              label: '调用' + system + '系统的\n' + backonUrl + '接口',
+              x: 120,
+              y: 110 * (i + 1),
+              id: this.uuid(),
+              index: this.data.nodes.length,
+              stateType: 'task',
+              url: backonUrl
+            }
+            this.data.nodes.push(node)
+          }
+          console.log(this.data.nodes)
+        } else {
+          // this.$message.error('未配置后台接口，无法进行服务编排！')
+        }
+      }
+    },
     openAddStartDialog() {
       this.showQueryBackonInterfaceDialog = true
     },
@@ -89,7 +120,7 @@ export default {
         x: 648,
         y: this.getNewNodeYAxis(),
         id: '0000000000',
-        index: ++this.index
+        index: this.data.nodes.length
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
@@ -107,45 +138,23 @@ export default {
         x: 100,
         y: this.getNewNodeYAxis(),
         id: '1111111111',
-        index: ++this.index
+        index: this.data.nodes.length
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
-    // addTask() {
-    //   var node = {
-    //     type: 'node',
-    //     size: '180*80',
-    //     shape: 'flow-rect',
-    //     color: '#FA8C16',
-    //     label: '起止节点',
-    //     x: 100,
-    //     y: this.getNewNodeYAxis(),
-    //     id: this.uuid(),
-    //     index: ++this.index
-    //   }
-    //   this.$refs.vgEditor.propsAPI.add('node', node)
-    // },
-    // addConverter() {
-    //   var node = {
-    //     type: 'node',
-    //     size: '180*80',
-    //     shape: 'flow-rect',
-    //     color: '#409EFF',
-    //     label: '结束节点',
-    //     x: 100,
-    //     y: this.getNewNodeYAxis(),
-    //     id: this.uuid(),
-    //     index: ++this.index
-    //   }
-    //   this.$refs.vgEditor.propsAPI.add('node', node)
-    // },
+
     save() {
+      var endNode = this.$refs.vgEditor.propsAPI.find('1111111111')
+      if (endNode === undefined) {
+        this.$message.error('不存在结束节点，不能保存配置！')
+        return
+      }
       var saveParams = {
         nodes: this.getDataNodes(),
         edges: this.$refs.vgEditor.propsAPI.save().edges,
         gatewayInterface: this.$route.query
       }
-      console.log(JSON.stringify(saveParams))
+      console.log(saveParams)
       addServiceArrange(saveParams).then((response) => {
         if (response.code === successCode) {
           this.$notify({
@@ -178,7 +187,6 @@ export default {
     dismissDialog(item) {
       item.type = 'task'
       this.showQueryBackonInterfaceDialog = false
-
       var node = {
         type: 'node',
         size: '200*80',
@@ -188,10 +196,15 @@ export default {
         x: 120,
         y: this.getNewNodeYAxis(),
         id: item.id,
-        index: ++this.index,
-        stateType: 'task'
+        index: this.data.nodes.length,
+        stateType: 'task',
+        url: item.url,
+        system: item.system
       }
-
+      // debugger
+      // var gatewayInterface = this.$route.query
+      // var backonList = gatewayInterface.backonUrl
+      // backonList.push({ system: item.system, backonUrl: item.backonUrl })
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
     dismissConverterDialog(item) {
@@ -207,7 +220,7 @@ export default {
         x: 120,
         y: this.getNewNodeYAxis(),
         id: item.id,
-        index: ++this.index,
+        index: this.data.nodes.length,
         stateType: 'converter'
       }
       this.$refs.vgEditor.propsAPI.add('node', node)

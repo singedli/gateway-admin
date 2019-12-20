@@ -54,3 +54,21 @@ export function updateBackonInterface(params) {
   })
 }
 
+export function getBackonInterfacesBySystem(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/backon/interface/getBackonInterfacesBySystem',
+    method: 'post',
+    data: params
+  })
+}
+
+export function getBackonInterfacesByUrl(params) {
+  return request({
+    baseURL: 'http://localhost:9000/gateway',
+    url: '/backon/interface/getBackonInterfacesByUrl',
+    method: 'post',
+    data: params
+  })
+}
+

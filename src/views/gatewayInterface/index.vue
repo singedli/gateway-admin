@@ -29,10 +29,7 @@
           <el-option label="复杂" value="COMPLICATE" />
         </el-select>
       </el-form-item>
-      <!-- <el-form-item align="right">
-        <el-button type="primary">查询</el-button>
-        <el-button type="primary">查询</el-button>
-      </el-form-item> -->
+
       <el-button type="primary" @click="getList">查询</el-button>
       <el-button type="primary" @click="handleClearQueryParams">清空</el-button>
       <el-form-item align="left">
@@ -55,13 +52,12 @@
       </el-table-column>
       <el-table-column label="名字" width="150px" align="center" prop="name" />
       <el-table-column label="URL" width="150px" align="center" prop="url" />
-      <el-table-column label="后台URL" width="150px" align="center" prop="backonUrl" />
+      <el-table-column show-overflow-tooltip="true" label="后台系统和URL" width="150px" align="center" prop="backonUrl" />
       <el-table-column label="类型" width="150px" align="center">
         <template slot-scope="{row}">
           {{ row.type | typeFilter }}
         </template>
       </el-table-column>
-      <el-table-column label="系统" width="150px" align="center" prop="system" />
       <el-table-column label="前置拦截器" width="150px" align="center" prop="preInterceptors" />
       <el-table-column label="后置拦截器" width="150px" align="center" prop="postInterceptors" />
       <el-table-column show-overflow-tooltip="true" label="调用配置" width="150px" align="center" prop="invokeConfig" />
@@ -83,10 +79,10 @@
 
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
-          <el-button type="primary" size="mini" @click="handleDelete(row.id)">删除</el-button>
-          <el-button type="primary" size="mini" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
-          <el-button type="primary" size="mini" @click="arrangeService(row)">编排服务</el-button>
+          <el-button type="text" size="medium" @click="handleUpdate(row)">编辑</el-button>
+          <el-button type="text" size="medium" @click="handleDelete(row.id)">删除</el-button>
+          <el-button type="text" size="medium" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
+          <el-button type="text" size="medium" @click="arrangeService(row)">编排服务</el-button>
 
         </template>
       </el-table-column>
@@ -106,15 +102,12 @@
       />
     </div>
     <el-dialog title="网关接口" :visible.sync="dialogCreateVisible" class="form-inline">
-      <el-form :model="updateForm" label-width="20%">
+      <el-form ref="updateForm" :model="updateForm" label-width="20%">
         <el-form-item label="接口名称:">
           <el-input v-model="updateForm.name" autocomplete="off" />
         </el-form-item>
         <el-form-item label="URL:">
           <el-input v-model="updateForm.url" autocomplete="off" label="url" />
-        </el-form-item>
-        <el-form-item label="后台URL:">
-          <el-input v-model="updateForm.backonUrl" autocomplete="off" label="backonUrl" />
         </el-form-item>
         <el-form-item label="类型:">
           <el-select v-model="updateForm.type" placeholder="请选择类型">
@@ -123,21 +116,39 @@
             <el-option label="复杂" value="COMPLICATE" />
           </el-select>
         </el-form-item>
-        <el-form-item label="系统:">
-          <el-input v-model="updateForm.system" autocomplete="off" label="系统" />
+        <el-form-item
+          v-for="(domain, index) in dynamicBackonForm.domains"
+          :key="domain.system"
+          :label="'接口后台系统:'"
+        >
+          <el-select ref="selectedBackon" v-model="domain.system" class="filter-item" placeholder="请选择后台系统" @change="getBackonInterfaceList($event,domain)">
+            <el-option
+              v-for="item in backonData"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
+          </el-select>
+          <span style="font-weight:500">后台URL:</span>
+          <el-select v-model="domain.backonUrl" placeholder="请选择后台URL">
+            <el-option
+              v-for="item in backonUrlData"
+              :key="item.url"
+              :label="item.name"
+              :value="item.url"
+            />
+          </el-select>
+          <el-button @click.prevent="addDomain()">添加</el-button>
+          <el-button @click.prevent="removeDomain(domain)">删除</el-button>
         </el-form-item>
+
         <el-form-item label="前置拦截器:">
           <el-input v-model="updateForm.preInterceptors" autocomplete="off" label="前置拦截器" />
         </el-form-item>
         <el-form-item label="后置拦截器:">
           <el-input v-model="updateForm.postInterceptors" autocomplete="off" label="后置拦截器" />
         </el-form-item>
-        <el-form-item label="状态:">
-          <el-select v-model="updateForm.status" placeholder="请选择状态">
-            <el-option label="生效" value="true" />
-            <el-option label="失效" value="false" />
-          </el-select>
-        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogCreateVisible = false">取 消</el-button>
@@ -149,8 +160,9 @@
 
 <script>
 import waves from '@/directive/waves' // waves directive
-// import { parseTime } from '@/utils'
 import { getList, deleteById, updateGatewayInterface, createGatewayInterface } from '@/api/gatewayInterface'
+import { getAllSystem } from '@/api/backon'
+import { getBackonInterfacesBySystem } from '@/api/backonInterface'
 
 export default {
   name: 'ComplexTable',
@@ -168,6 +180,14 @@ export default {
   },
   data() {
     return {
+      dynamicBackonForm: {
+        domains: [{
+          system: '',
+          backonUrl: ''
+        }]
+      },
+      backonUrlData: [],
+      backonData: [],
       flag: '',
       list: null,
       total: 0,
@@ -196,8 +216,27 @@ export default {
   },
   created() {
     this.getList()
+    this.getSystem()
   },
   methods: {
+
+    addDomain() {
+      this.dynamicBackonForm.domains.push({
+        system: '',
+        backonUrl: ''
+      })
+      this.backonUrlData = []
+    },
+    removeDomain(item) {
+      if (this.dynamicBackonForm.domains.length <= 1) {
+        return
+      }
+      var index = this.dynamicBackonForm.domains.indexOf(item)
+      if (index !== -1) {
+        this.dynamicBackonForm.domains.splice(index, 1)
+      }
+    },
+
     handleDialog: function(data, status) {
       this.dataShow = data
       this.dialogStatus = status
@@ -208,6 +247,26 @@ export default {
         this.listLoading = false
         this.list = response.data.records
       })
+    },
+    getSystem() {
+      getAllSystem().then(response => {
+        var systems = response.data
+        for (var i in systems) {
+          var system = systems[i]
+          this.backonData.push({ key: system, display_name: system })
+        }
+      })
+    },
+    getBackonInterfaceList(event, domain) {
+      domain.backonUrl = ''
+      getBackonInterfacesBySystem({ 'system': event }).then(response => {
+        if (response.code === '00000000') {
+          this.backonUrlData = response.data
+        }
+      })
+    },
+    handleBackonUrlSelected(event, domain) {
+      console.log(event)
     },
     handleClearQueryParams() {
       this.listQuery = {}
@@ -248,14 +307,34 @@ export default {
       this.dialogCreateVisible = true
       this.updateForm = gatewayInterface
       this.flag = 'update'
+      var backonList = JSON.parse(gatewayInterface.backonUrl)
+      for (var i = 0; i < backonList.length; i++) {
+        var domain = backonList[i]
+        // var domain = this.dynamicBackonForm.domains[i]
+        // domain.system = backonList[i].system
+        // this.getBackonInterfaceList(backonList[i].system, this.dynamicBackonForm.domains[i])
+        // this.getBackonInterfaceList(domain.system, domain)
+        getBackonInterfacesBySystem({ 'system': domain.system }).then(response => {
+          if (response.code === '00000000') {
+            this.backonUrlData = response.data
+          }
+        })
+        // domain.backonUrl = backonList[i].backonUrl
+        this.dynamicBackonForm.domains[i] = domain
+      }
     },
     handleCreateGatewayInterface() {
       this.dialogCreateVisible = true
       this.updateForm = {}
       this.flag = 'create'
+      this.dynamicBackonForm.domains = [{
+        system: '',
+        backonUrl: ''
+      }]
     },
     submitForm(flag) {
       this.dialogCreateVisible = false
+      this.updateForm.backonUrl = JSON.stringify(this.dynamicBackonForm.domains)
       if (flag === 'create') {
         createGatewayInterface(this.updateForm).then(res => {
           if (res.code === '00000000') {
