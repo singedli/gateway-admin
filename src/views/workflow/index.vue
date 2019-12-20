@@ -75,7 +75,7 @@ export default {
       } else {
         if (this.$route.query.backonUrl) {
           var backonUrlList = JSON.parse(this.$route.query.backonUrl)
-          console.log(backonUrlList.length)
+          console.log(backonUrlList)
           for (var i = 0; i < backonUrlList.length; i++) {
             var system = backonUrlList[i].system
             var backonUrl = backonUrlList[i].backonUrl
@@ -87,14 +87,16 @@ export default {
               label: '调用' + system + '系统的\n' + backonUrl + '接口',
               x: 120,
               y: 110 * (i + 1),
-              id: backonUrl,
+              id: this.uuid(),
               index: this.data.nodes.length,
-              stateType: 'task'
+              stateType: 'task',
+              url: backonUrl
             }
             this.data.nodes.push(node)
           }
+          console.log(this.data.nodes)
         } else {
-          this.$message.error('未配置后台接口，无法进行服务编排！')
+          // this.$message.error('未配置后台接口，无法进行服务编排！')
         }
       }
     },
@@ -118,7 +120,7 @@ export default {
         x: 648,
         y: this.getNewNodeYAxis(),
         id: '0000000000',
-        index: ++this.index
+        index: this.data.nodes.length
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
@@ -136,7 +138,7 @@ export default {
         x: 100,
         y: this.getNewNodeYAxis(),
         id: '1111111111',
-        index: ++this.index
+        index: this.data.nodes.length
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
@@ -185,7 +187,6 @@ export default {
     dismissDialog(item) {
       item.type = 'task'
       this.showQueryBackonInterfaceDialog = false
-
       var node = {
         type: 'node',
         size: '200*80',
@@ -195,10 +196,15 @@ export default {
         x: 120,
         y: this.getNewNodeYAxis(),
         id: item.id,
-        index: ++this.index,
-        stateType: 'task'
+        index: this.data.nodes.length,
+        stateType: 'task',
+        url: item.url,
+        system: item.system
       }
-
+      // debugger
+      // var gatewayInterface = this.$route.query
+      // var backonList = gatewayInterface.backonUrl
+      // backonList.push({ system: item.system, backonUrl: item.backonUrl })
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
     dismissConverterDialog(item) {
@@ -214,7 +220,7 @@ export default {
         x: 120,
         y: this.getNewNodeYAxis(),
         id: item.id,
-        index: ++this.index,
+        index: this.data.nodes.length,
         stateType: 'converter'
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
