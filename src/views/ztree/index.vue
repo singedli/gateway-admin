@@ -1,67 +1,67 @@
 <template>
   <div class="app-container">
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <el-input
-              v-model="jsonIn"
-              type="textarea"
-              :rows="20"
-              placeholder="请输入JSON"
-              @blur="loadDataRight"
-            />
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <el-input
+            v-model="jsonIn"
+            type="textarea"
+            :rows="20"
+            placeholder="请输入JSON"
+            @blur="loadDataRight"
+          />
+        </div>
+      </el-col>
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <el-input
+            v-model="jsonOut"
+            type="textarea"
+            :rows="20"
+            placeholder="请输入JSON"
+            @blur="loadDataLeft"
+          />
+        </div>
+      </el-col>
+    </el-row>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <tree
+            :setting="setting"
+            :nodes="nodesIn"
+            @onCheck="onCheck"
+            @onCreated="handleCreated"
+          />
+        </div>
+      </el-col>
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <tree
+            :setting="setting"
+            :nodes="nodesOut"
+            @onCheck="onCheck"
+            @onCreated="handleCreated"
+          />
+        </div>
+      </el-col>
+    </el-row>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <div class="buttons">
+            <el-button @click="getCheckedNodes">通过 node 获取</el-button>
           </div>
-        </el-col>
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <el-input
-              v-model="jsonOut"
-              type="textarea"
-              :rows="20"
-              placeholder="请输入JSON"
-              @blur="loadDataLeft"
-            />
+        </div>
+      </el-col>
+      <el-col :span="12">
+        <div class="grid-content bg-purple">
+          <div class="buttons">
+            <el-button @click="getJson">通过 node 获取json</el-button>
           </div>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <tree
-                :setting="setting"
-                :nodes="nodesIn"
-                @onCheck="onCheck"
-                @onCreated="handleCreated"
-              />
-          </div>
-        </el-col>
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <tree
-                :setting="setting"
-                :nodes="nodesOut"
-                @onCheck="onCheck"
-                @onCreated="handleCreated"
-              />
-          </div>
-        </el-col>
-      </el-row>
-       <el-row :gutter="20">
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <div class="buttons">
-                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
-            </div>
-          </div>
-        </el-col>
-        <el-col :span="12">
-          <div class="grid-content bg-purple">
-            <div class="buttons">
-                <el-button @click="getJson">通过 node 获取json</el-button>
-            </div>
-          </div>
-        </el-col>
-      </el-row>
+        </div>
+      </el-col>
+    </el-row>
   </div>
 </template>
 <script>
@@ -185,23 +185,23 @@ export default {
       alert(JSON.stringify(this.selected))
     },
     getJson() {
-      //alert(JSON.stringify(this.jsonOut))
+      // alert(JSON.stringify(this.jsonOut))
       alert(JSON.stringify(this.draged))
     },
     zTreeOnDrag(event, treeId, treeNodes) {
-  // alert(treeNodes.length)
+      // alert(treeNodes.length)
     },
     zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
-      if ( moveType === 'inner') {
-        if ( targetNode != null) {
+      if (moveType === 'inner') {
+        if (targetNode != null) {
           var treeName = treeNodes[0].name
           var targetName = targetNode.name
           console.log(targetNode.getParentNode())
           console.log(targetNode.getIndex())
           this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
           this.ztreeObj.removeNode(targetNode)
-          var node = treeName+'='+targetName
-          alert(node)   
+          var node = treeName + '=' + targetName
+          alert(node)
         }
         console.log(treeNodes)
         console.log(targetNode)

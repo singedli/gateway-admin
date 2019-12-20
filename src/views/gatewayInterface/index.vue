@@ -148,12 +148,7 @@
         <el-form-item label="后置拦截器:">
           <el-input v-model="updateForm.postInterceptors" autocomplete="off" label="后置拦截器" />
         </el-form-item>
-        <el-form-item label="状态:">
-          <el-select v-model="updateForm.status" placeholder="请选择状态">
-            <el-option label="生效" value="true" />
-            <el-option label="失效" value="false" />
-          </el-select>
-        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogCreateVisible = false">取 消</el-button>
@@ -314,10 +309,18 @@ export default {
       this.flag = 'update'
       var backonList = JSON.parse(gatewayInterface.backonUrl)
       for (var i = 0; i < backonList.length; i++) {
-        var domain = this.dynamicBackonForm.domains[i]
-        domain.system = backonList[i].system
-        this.getBackonInterfaceList(backonList[i].system, this.dynamicBackonForm.domains[i])
-        domain.backonUrl = backonList[i].backonUrl
+        var domain = backonList[i]
+        // var domain = this.dynamicBackonForm.domains[i]
+        // domain.system = backonList[i].system
+        // this.getBackonInterfaceList(backonList[i].system, this.dynamicBackonForm.domains[i])
+        // this.getBackonInterfaceList(domain.system, domain)
+        getBackonInterfacesBySystem({ 'system': domain.system }).then(response => {
+          if (response.code === '00000000') {
+            this.backonUrlData = response.data
+          }
+        })
+        // domain.backonUrl = backonList[i].backonUrl
+        this.dynamicBackonForm.domains[i] = domain
       }
     },
     handleCreateGatewayInterface() {
