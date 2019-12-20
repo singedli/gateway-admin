@@ -1,68 +1,76 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <el-input
-            v-model="jsonIn"
-            type="textarea"
-            :rows="20"
-            placeholder="请输入JSON"
-            @blur="loadDataRight"
-          />
-        </div>
-      </el-col>
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <el-input
-            v-model="jsonOut"
-            type="textarea"
-            :rows="20"
-            placeholder="请输入JSON"
-            @blur="loadDataLeft"
-          />
-        </div>
-      </el-col>
-    </el-row>
-    <el-row :gutter="20">
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <tree
-            :setting="setting"
-            :nodes="nodesIn"
-            @onCheck="onCheck"
-            @onCreated="handleCreated"
-          />
-        </div>
-      </el-col>
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <tree
-            :setting="setting"
-            :nodes="nodesOut"
-            @onCheck="onCheck"
-            @onCreated="handleCreated"
-          />
-        </div>
-      </el-col>
-    </el-row>
-    <el-row :gutter="20">
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <div class="buttons">
-            <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="jsonIn"
+              type="textarea"
+              :rows="20"
+              placeholder="请输入JSON"
+              @blur="loadDataRight"
+            />
           </div>
-        </div>
-      </el-col>
-      <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <div class="buttons">
-            <el-button @click="getJson">通过 node 获取json</el-button>
+        </el-col>
+        <el-col :span="8">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="result"
+              type="textarea"
+              :rows="20"
+              placeholder=""
+              @blur="loadDataLeft"
+            />
           </div>
-        </div>
-      </el-col>
-    </el-row>
->>>>>>> 0dc95048f9702d008bedf4aedd363bcad08f9802
+        </el-col>
+        <el-col :span="8">
+          <div class="grid-content bg-purple">
+            <el-input
+              v-model="jsonOut"
+              type="textarea"
+              :rows="20"
+              placeholder="请输入JSON"
+              @blur="loadDataLeft"
+            />
+          </div>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <div class="grid-content bg-purple">
+            <tree
+                :setting="setting"
+                :nodes="nodesIn"
+                @onCheck="onCheck"
+                @onCreated="handleCreated"
+              />
+          </div>
+        </el-col>
+        <el-col :span="4">
+          <div class="grid-content bg-purple">
+            <div class="buttons">
+                <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="4">
+          <div class="grid-content bg-purple">
+            <div class="buttons">
+                <el-button @click="getJson">通过 node 获取json</el-button>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="8">
+          <div class="grid-content bg-purple">
+            <tree
+                :setting="setting"
+                :nodes="nodesOut"
+                @onCheck="onCheck"
+                @onCreated="handleCreated"
+              />
+          </div>
+        </el-col>
+      </el-row>
   </div>
 </template>
 <script>
@@ -194,13 +202,13 @@ export default {
     handleDragParent(treeNode, pNode, pName) {
       if (pNode.parentTId == null) {
         var name = pName + '.' + treeNode.name.split(':')[0]
-        this.draging = name 
+        this.draging = name
       } else {
         var parentNode = pNode.getParentNode()
         var parentName = ''
         console.log(parentNode.name)
-        if (isNaN(pName)){
-          //alert(parentNode.name)
+        if (isNaN(pName)) {
+          // alert(parentNode.name)
           parentName = parentNode.name + '.' + pName
         } else {
           parentName = parentNode.name
@@ -208,35 +216,56 @@ export default {
         this.handleDragParent(treeNode, parentNode, parentName)
       }
     },
-    handleTargetParent(treeNode, pNode, pName , targetName) {
+    handleTargetParent(treeNode, pNode, pName, targetName) {
       if (pNode.parentTId == null) {
         var name = pName + '.' + treeNode.name.split(':')[0]
-        targetName = name 
+        targetName = name
         return targetName
       } else {
         var parentNode = pNode.getParentNode()
         var parentName = ''
-        if (isNaN(pName)){
-          //alert(parentNode.name)
+        if (isNaN(pName)) {
+          // alert(parentNode.name)
           parentName = parentNode.name + '.' + pName
         } else {
           parentName = parentNode.name
         }
-        return this.handleTargetParent(treeNode, parentNode, parentName,targetName)
+        return this.handleTargetParent(treeNode, parentNode, parentName, targetName)
       }
     },
     zTreeOnDrag(event, treeId, treeNodes) {
-      // alert(treeNodes.length)
+      var treeNode = treeNodes[0]
+      if (treeNode.parentTId == null) {
+        var name = treeNode.name.split(':')[0]
+        this.draging = name
+      } else {
+        var pNode = treeNode.getParentNode()
+        var pName = pNode.name
+        this.handleDragParent(treeNode, pNode, pName)
+      }
     },
     zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+      var targetName = ''
+      if (targetNode.parentTId == null) {
+        var name = targetNode.name.split(':')[0]
+        targetName = name
+      } else {
+        var pNode = targetNode.getParentNode()
+        var pName = pNode.name
+        targetName = this.handleTargetParent(targetNode, pNode, pName, targetName)
+      }
+
       if (moveType === 'inner') {
         if (targetNode != null) {
-          var treeName = treeNodes[0].name
-          var targetName = targetNode.name
+          // var treeName = treeNodes[0].name
+          // var targetName = targetNode.name
           console.log(targetNode.getParentNode())
           console.log(targetNode.getIndex())
           this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
           this.ztreeObj.removeNode(targetNode)
+          var node = this.draging + '=' + targetName
+          this.draged.push(node)
+          this.result = JSON.stringify(this.draged)
         }
         console.log(treeNodes)
         console.log(targetNode)
@@ -262,8 +291,7 @@ export default {
     onClick: function(evt, treeId, treeNode) {
       // 点击事件
       // console.log(treeNode)
-      //console.log(treeNode.parentTId)
-      alert(JSON.stringify(treeNode))
+      // console.log(treeNode.parentTId)
       // console.log(evt.type, treeNode)
     },
     onCheck: function(evt, treeId, treeNode) {
