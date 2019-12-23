@@ -82,7 +82,7 @@
           <el-button type="text" size="medium" @click="handleUpdate(row)">编辑</el-button>
           <el-button type="text" size="medium" @click="handleDelete(row.id)">删除</el-button>
           <el-button type="text" size="medium" @click="handleUpdateStatus(row)">{{ row.status?'失效':'生效' }}</el-button>
-          <el-button type="text" size="medium" @click="arrangeService(row)">编排服务</el-button>
+          <el-button v-if="row.type === 'COMPLICATE'" type="text" size="medium" @click="arrangeService(row)">编排服务</el-button>
 
         </template>
       </el-table-column>
@@ -273,16 +273,27 @@ export default {
     },
 
     handleDelete(id) {
-      deleteById({ 'id': id }).then(res => {
-        if (res.code === '00000000') {
-          this.$notify({
-            title: 'Success',
-            message: '删除成功',
-            type: 'success',
-            duration: 1000
-          })
-          this.getList(this.listQuery)
-        }
+      this.$confirm('确定要删除该接口?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteById({ 'id': id }).then(res => {
+          if (res.code === '00000000') {
+            this.$notify({
+              title: 'Success',
+              message: '删除成功',
+              type: 'success',
+              duration: 1000
+            })
+            this.getList(this.listQuery)
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     },
     handleFilter() {

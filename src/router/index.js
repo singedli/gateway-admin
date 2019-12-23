@@ -94,42 +94,42 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/serviceArrange',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'serviceArrange',
-        component: () => import('@/views/serviceArrange/index'),
-        meta: { title: 'react服务编排', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/jsonTree',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'jsonTree',
-        component: () => import('@/views/jsonTree/index'),
-        meta: { title: '树形json', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/arrange',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'arrange',
-        component: () => import('@/views/arrange/index'),
-        meta: { title: '服务编排', icon: 'form' }
-      }
-    ]
-  },
+  // {
+  //   path: '/serviceArrange',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'serviceArrange',
+  //       component: () => import('@/views/serviceArrange/index'),
+  //       meta: { title: 'react服务编排', icon: 'form' }
+  //     }
+  //   ]
+  // },
+  // {
+  //   path: '/jsonTree',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'jsonTree',
+  //       component: () => import('@/views/jsonTree/index'),
+  //       meta: { title: '树形json', icon: 'form' }
+  //     }
+  //   ]
+  // },
+  // {
+  //   path: '/arrange',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'arrange',
+  //       component: () => import('@/views/arrange/index'),
+  //       meta: { title: '服务编排', icon: 'form' }
+  //     }
+  //   ]
+  // },
   {
     path: '/ztree',
     component: Layout,
@@ -168,18 +168,18 @@ export const constantRoutes = [
     ]
   },
 
-  {
-    path: '/echarts',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'echarts',
-        component: () => import('@/views/echartTest/index'),
-        meta: { title: 'echarts测试', icon: 'form' }
-      }
-    ]
-  },
+  // {
+  //   path: '/echarts',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'echarts',
+  //       component: () => import('@/views/echartTest/index'),
+  //       meta: { title: 'echarts测试', icon: 'form' }
+  //     }
+  //   ]
+  // },
   { path: '*', redirect: '/404', hidden: true }
 ]
 

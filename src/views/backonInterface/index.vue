@@ -125,7 +125,7 @@
           <el-input v-model="temp.url" />
         </el-form-item>
         <el-form-item label="所属系统" prop="system">
-          <el-select v-model="temp.system" class="filter-item" placeholder="Please select">
+          <el-select v-model="temp.system" class="filter-item" placeholder="请选择">
             <el-option
               v-for="item in systemOptions"
               :key="item.key"
@@ -135,7 +135,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="请求类型" prop="httpMethod">
-          <el-select v-model="temp.httpMethod" class="filter-item" placeholder="Please select">
+          <el-select v-model="temp.httpMethod" class="filter-item" placeholder="请选择">
             <el-option
               v-for="item in httpMethodOptions"
               :key="item.key"
@@ -148,7 +148,7 @@
           <el-input v-model="temp.httpHeader" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
+          <el-select v-model="temp.status" class="filter-item" placeholder="请选择">
             <el-option
               v-for="item in statusOptions"
               :key="item.key"
@@ -363,24 +363,35 @@ export default {
     },
     handleDelete(row) {
       console.log(row.id)
-      deleteBackonInterface(row).then(response => {
-        console.log(response)
-        if (response.code === successCode) {
-          this.$notify({
-            title: '删除',
-            message: '删除成功',
-            type: 'success',
-            duration: 2000
-          })
-        } else {
-          this.$notify({
-            title: '删除',
-            message: '删除失败',
-            type: 'failure',
-            duration: 2000
-          })
-        }
-        this.getList()
+      this.$confirm('确定要删除该接口?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteBackonInterface(row).then(response => {
+          console.log(response)
+          if (response.code === successCode) {
+            this.$notify({
+              title: '删除',
+              message: '删除成功',
+              type: 'success',
+              duration: 2000
+            })
+          } else {
+            this.$notify({
+              title: '删除',
+              message: '删除失败',
+              type: 'failure',
+              duration: 2000
+            })
+          }
+          this.getList()
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     },
     getSortClass: function(key) {

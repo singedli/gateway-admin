@@ -32,7 +32,7 @@ import VGEditor, { Flow } from 'vg-editor'
 import backonInterface from '@/views/backonInterface/index'
 import jsonConverter from '@/views/messageConverter/index'
 import { addServiceArrange } from '@/api/serviceArrange'
-import { getBackonInterfacesByUrl } from '@/api/backonInterface'
+// import { getBackonInterfacesByUrl } from '@/api/backonInterface'
 
 const successCode = '00000000'
 export default {
