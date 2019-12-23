@@ -18,7 +18,6 @@
               v-model="result"
               type="textarea"
               :rows="20"
-              placeholder=""
               @blur="loadDataLeft"
             />
           </div>
@@ -37,15 +36,20 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
-          <div class="grid-content bg-purple">
-            <a>tree</a>
-            <tree
-                :setting="setting"
-                :nodes="nodesIn"
-                @onCheck="onCheck"
-                @onCreated="handleCreated"
-              />
-          </div>
+          <el-card class="box-card">
+            <div slot="header" class="clearfix">
+              <span>卡片名称</span>
+              <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+            </div>
+            <div class="grid-content bg-purple">
+              <tree
+                  :setting="setting"
+                  :nodes="nodesIn"
+                  @onCheck="onCheck"
+                  @onCreated="handleCreated"
+                />
+            </div>
+          </el-card>
         </el-col>
         <el-col :span="4">
           <div class="grid-content bg-purple">
@@ -62,15 +66,20 @@
           </div>
         </el-col>
         <el-col :span="8">
-          <div class="grid-content bg-purple">
-            <a>tree</a>
-            <tree
-                :setting="setting"
-                :nodes="nodesOut"
-                @onCheck="onCheck"
-                @onCreated="handleCreated"
-              />
-          </div>
+          <el-card class="box-card">
+            <div slot="header" class="clearfix">
+              <span>卡片名称</span>
+              <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+            </div>
+            <div class="grid-content bg-purple">
+              <tree
+                  :setting="setting"
+                  :nodes="nodesIn"
+                  @onCheck="onCheck"
+                  @onCreated="handleCreated"
+                />
+            </div>
+          </el-card>
         </el-col>
       </el-row>
   </div>
