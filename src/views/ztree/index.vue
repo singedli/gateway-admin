@@ -38,6 +38,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <div class="grid-content bg-purple">
+            <a>tree</a>
             <tree
                 :setting="setting"
                 :nodes="nodesIn"
@@ -62,6 +63,7 @@
         </el-col>
         <el-col :span="8">
           <div class="grid-content bg-purple">
+            <a>tree</a>
             <tree
                 :setting="setting"
                 :nodes="nodesOut"
@@ -257,15 +259,29 @@ export default {
 
       if (moveType === 'inner') {
         if (targetNode != null) {
-          // var treeName = treeNodes[0].name
-          // var targetName = targetNode.name
-          console.log(targetNode.getParentNode())
-          console.log(targetNode.getIndex())
-          this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
-          this.ztreeObj.removeNode(targetNode)
-          var node = this.draging + '=' + targetName
-          this.draged.push(node)
-          this.result = JSON.stringify(this.draged)
+          this.$confirm('请选择覆盖或者新增！', '提示', {
+            confirmButtonText: '覆盖',
+            cancelButtonText: '新增',
+            type: 'warning',
+            center: true
+          }).then(() => {
+            console.log(targetNode.getParentNode())
+            console.log(targetNode.getIndex())
+            this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+            this.ztreeObj.removeNode(targetNode)
+            var node = this.draging + '=' + targetName
+            this.draged.push(node)
+            this.result = JSON.stringify(this.draged)
+            this.$message({
+              type: 'info',
+              message: '覆盖成功!'
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '新增成功!'
+            })
+          })
         }
         console.log(treeNodes)
         console.log(targetNode)
