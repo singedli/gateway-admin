@@ -43,10 +43,10 @@
             </div>
             <div class="grid-content bg-purple">
               <tree
-                  :setting="setting"
+                  :setting="settingRight"
                   :nodes="nodesRight"
-                  @onCheck="onCheck"
-                  @onCreated="handleCreated"
+                  @onCheck="onCheckRight"
+                  @onCreated="handleCreatedRight"
                 />
             </div>
           </el-card>
@@ -70,10 +70,10 @@
             </div>
             <div class="grid-content bg-purple">
               <tree
-                  :setting="setting"
+                  :setting="settingLeft"
                   :nodes="nodesLeft"
-                  @onCheck="onCheck"
-                  @onCreated="handleCreated"
+                  @onCheck="onCheckLeft"
+                  @onCreated="handleCreatedLeft"
                 />
             </div>
           </el-card>
@@ -96,14 +96,15 @@ export default {
     return {
       jsonRight: '',
       jsonLeft: '',
-      ztreeObj: null,
+      ztreeObjRight: null,
+      ztreeObjLeft: null,
       nodesRight: [],
       nodesLeft: [],
       selected: [],
       draging: '',
       result: '',
       draged: [],
-      setting: {
+      settingRight: {
         check: {
           enable: true
         },
@@ -129,7 +130,36 @@ export default {
         },
         callback: {
           onDrag: this.zTreeOnDrag,
-          onDrop: this.zTreeOnDrop
+          onDrop: this.zTreeOnDropRight
+        }
+      },
+      settingLeft: {
+        check: {
+          enable: true
+        },
+        data: {
+          simpleData: {
+            enable: true,
+            pIdKey: 'pid'
+          }
+        },
+        edit: {
+          enable: true,
+          drag: {
+            isMove: false,
+            isCopy: true,
+            prev: true,
+            inner: true,
+            next: true
+          },
+          removeTitle: '删除节点',
+          renameTitle: '编辑节点名称',
+          showRenameBtn: true,
+          showRemoveBtn: true
+        },
+        callback: {
+          onDrag: this.zTreeOnDrag,
+          onDrop: this.zTreeOnDropLeft
         }
       }
     }
@@ -215,7 +245,7 @@ export default {
         this.handleDragParent(treeNode, pNode, pName)
       }
     },
-    zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+    zTreeOnDropRight(event, treeId, treeNodes, targetNode, moveType) {
       var targetName = ''
       if (targetNode.parentTId == null) {
         var name = targetNode.name.split(':')[0]
@@ -234,9 +264,46 @@ export default {
             type: 'warning',
             center: true
           }).then(() => {
-            this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
-            this.ztreeObj.removeNode(targetNode)
+            this.ztreeObjLeft.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+            this.ztreeObjLeft.removeNode(targetNode)
             var node = this.draging + '=' + targetName
+            this.draged.push(node)
+            this.result = JSON.stringify(this.draged)
+            this.$message({
+              type: 'info',
+              message: '覆盖成功!'
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '新增成功!'
+            })
+          })
+        }
+      }
+    },
+    zTreeOnDropLeft(event, treeId, treeNodes, targetNode, moveType) {
+      var targetName = ''
+      if (targetNode.parentTId == null) {
+        var name = targetNode.name.split(':')[0]
+        targetName = name
+      } else {
+        var pNode = targetNode.getParentNode()
+        var pName = pNode.name
+        targetName = this.handleTargetParent(targetNode, pNode, pName, targetName)
+      }
+
+      if (moveType === 'inner') {
+        if (targetNode != null) {
+          this.$confirm('请选择覆盖或者新增！', '提示', {
+            confirmButtonText: '覆盖',
+            cancelButtonText: '新增',
+            type: 'warning',
+            center: true
+          }).then(() => {
+            this.ztreeObjRight.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+            this.ztreeObjRight.removeNode(targetNode)
+            var node = targetName + '=' + this.draging
             this.draged.push(node)
             this.result = JSON.stringify(this.draged)
             this.$message({
@@ -269,7 +336,7 @@ export default {
         this.handleParent(treeNode, parentNode, parentName)
       }
     },
-    onCheck: function(evt, treeId, treeNode) {
+    onCheckRight: function(evt, treeId, treeNode) {
       if (treeNode.parentTId == null) {
         var name = treeNode.name.split(':')[0]
         if (treeNode.checked) {
@@ -286,8 +353,30 @@ export default {
         this.handleParent(treeNode, pNode, pName)
       }
     },
-    handleCreated: function(ztreeObj) {
-      this.ztreeObj = ztreeObj
+    onCheckLeft: function(evt, treeId, treeNode) {
+      if (treeNode.parentTId == null) {
+        var name = treeNode.name.split(':')[0]
+        if (treeNode.checked) {
+          this.selected.push(name)
+        } else {
+          var index = this.selected.indexOf(name)
+          if (index > -1) {
+            this.selected.splice(index, 1)
+          }
+        }
+      } else {
+        var pNode = treeNode.getParentNode()
+        var pName = pNode.name
+        this.handleParent(treeNode, pNode, pName)
+      }
+    },
+    handleCreatedRight: function(ztreeObj) {
+      this.ztreeObjRight = ztreeObj
+      // onCreated 中操作ztreeObj对象展开第一个节点
+      ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
+    },
+    handleCreatedLeft: function(ztreeObj) {
+      this.ztreeObjLeft = ztreeObj
       // onCreated 中操作ztreeObj对象展开第一个节点
       ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
     }
