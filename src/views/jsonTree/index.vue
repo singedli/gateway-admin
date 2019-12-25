@@ -32,7 +32,9 @@ import waves from '@/directive/waves' // waves directive
 import { messageConverterToTree } from '@/api/messageConverter'
 
 const successCode = '00000000'
-
+var vm = new Vue({
+  
+})
 export default {
   directives: { waves },
   data() {
