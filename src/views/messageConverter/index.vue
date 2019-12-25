@@ -141,16 +141,16 @@
         <el-form-item label="后台URL" prop="backonUrl">
           <el-input v-model="temp.backonUrl" />
         </el-form-item>
-        <el-form-item label="请求报文配置" prop="requestConfig">       
-          <el-input v-model="temp.requestConfig" readonly="true"/>  
-          <el-button type="primary" icon="el-icon-edit" @click="handleJsonByZtree">请求报文配置</el-button>
+        <el-form-item label="请求报文配置" prop="requestConfig">
+          <el-input v-model="temp.requestConfig" readonly="true"/>
+          <el-button type="primary" icon="el-icon-edit" @click="dialogZtreeVisible = true">请求报文配置</el-button>
         </el-form-item>
         <el-form-item label="请求报文格式配置" prop="requestStruct">
           <el-input v-model="temp.requestStruct" readonly="true"/>
         </el-form-item>
-        <el-form-item label="响应报文配置" prop="responseConfig">  
-          <el-input v-model="temp.responseConfig" readonly="true"/>    
-          <el-button type="primary" icon="el-icon-edit" @click="handleJsonByZtree">响应报文配置</el-button> 
+        <el-form-item label="响应报文配置" prop="responseConfig">
+          <el-input v-model="temp.responseConfig" readonly="true"/>
+          <el-button type="primary" icon="el-icon-edit" @click="dialogZtreeVisible = true">响应报文配置</el-button>
         </el-form-item>
         <el-form-item label="响应报文格式配置" prop="responseStruct">
           <el-input v-model="temp.responseStruct" readonly="true"/>
@@ -172,7 +172,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="textMap[dialogStatus]"  width="70%" :visible.sync="dialogZtreeVisible">
+    <el-dialog :title="报文配置"  width="70%" :visible.sync="dialogZtreeVisible">
       <template>
         <div class="app-container">
             <el-row :gutter="20">
@@ -210,7 +210,7 @@
               </el-col>
             </el-row>
             <el-row :gutter="20">
-              <el-col :span="8">
+              <el-col :span="12">
                 <el-card class="box-card">
                   <div slot="header" class="clearfix">
                     <span>树状图</span>
@@ -226,18 +226,7 @@
                   </div>
                 </el-card>
               </el-col>
-              <el-col :span="8">
-                <el-card class="box-card">
-                  <div slot="header" class="clearfix">
-                    <span>操作按钮</span>
-                  </div>
-                  <div class="grid-content bg-purple">
-                    <el-button @click="getCheckedNodes">通过 node 获取</el-button>
-                    <el-button style="float: right" @click="getJson">通过 node 获取json</el-button>
-                  </div>
-                </el-card>
-              </el-col>
-              <el-col :span="8">
+              <el-col :span="12">
                 <el-card class="box-card">
                   <div slot="header" class="clearfix">
                     <span>树状图</span>
@@ -255,8 +244,12 @@
               </el-col>
             </el-row>
         </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogZtreeVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleZtreeToJson">确认</el-button>
+       </div>
       </template>
-    </el-dialog> 
+    </el-dialog>
   </div>
 </template>
 
@@ -454,8 +447,8 @@ export default {
         status: 1
       }
     },
-    handleJsonByZtree() {
-      this.dialogZtreeVisible = true
+    handleZtreeToJson() {
+      this.dialogZtreeVisible = false
     },
     handleCreate() {
       this.resetTemp()
@@ -563,7 +556,7 @@ export default {
     handleCheckedConverter(item) {
       this.$emit('selectedConverter', item)
     },
-        loadDataRight() {
+    loadDataRight() {
       var param = JSON.parse(this.jsonRight)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
@@ -594,12 +587,6 @@ export default {
           })
         }
       })
-    },
-    getCheckedNodes() {
-      alert(JSON.stringify(this.selected))
-    },
-    getJson() {
-      alert(JSON.stringify(this.draged))
     },
     handleDragParent(treeNode, pNode, pName) {
       if (pNode.parentTId == null) {
@@ -717,57 +704,6 @@ export default {
         }
       }
     },
-    handleParent(treeNode, pNode, pName) {
-      if (pNode.parentTId == null) {
-        var name = pName + '.' + treeNode.name.split(':')[0]
-        if (treeNode.checked) {
-          this.selected.push(name)
-        } else {
-          var index = this.selected.indexOf(name)
-          if (index > -1) {
-            this.selected.splice(index, 1)
-          }
-        }
-      } else {
-        var parentNode = pNode.getParentNode()
-        var parentName = parentNode.name + '.' + pName
-        this.handleParent(treeNode, parentNode, parentName)
-      }
-    },
-    onCheckRight: function(evt, treeId, treeNode) {
-      if (treeNode.parentTId == null) {
-        var name = treeNode.name.split(':')[0]
-        if (treeNode.checked) {
-          this.selected.push(name)
-        } else {
-          var index = this.selected.indexOf(name)
-          if (index > -1) {
-            this.selected.splice(index, 1)
-          }
-        }
-      } else {
-        var pNode = treeNode.getParentNode()
-        var pName = pNode.name
-        this.handleParent(treeNode, pNode, pName)
-      }
-    },
-    onCheckLeft: function(evt, treeId, treeNode) {
-      if (treeNode.parentTId == null) {
-        var name = treeNode.name.split(':')[0]
-        if (treeNode.checked) {
-          this.selected.push(name)
-        } else {
-          var index = this.selected.indexOf(name)
-          if (index > -1) {
-            this.selected.splice(index, 1)
-          }
-        }
-      } else {
-        var pNode = treeNode.getParentNode()
-        var pName = pNode.name
-        this.handleParent(treeNode, pNode, pName)
-      }
-    },
     handleCreatedRight: function(ztreeObj) {
       this.ztreeObjRight = ztreeObj
       // onCreated 中操作ztreeObj对象展开第一个节点
@@ -781,3 +717,4 @@ export default {
   }
 }
 </script>
+
