@@ -143,14 +143,14 @@
         </el-form-item>
         <el-form-item label="请求报文配置" prop="requestConfig">
           <el-input v-model="temp.requestConfig" readonly="true"/>
-          <el-button type="primary" icon="el-icon-edit" @click="dialogZtreeVisible = true">请求报文配置</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="handleDialogZtree('handleRequest')">请求报文配置</el-button>
         </el-form-item>
         <el-form-item label="请求报文格式配置" prop="requestStruct">
           <el-input v-model="temp.requestStruct" readonly="true"/>
         </el-form-item>
         <el-form-item label="响应报文配置" prop="responseConfig">
           <el-input v-model="temp.responseConfig" readonly="true"/>
-          <el-button type="primary" icon="el-icon-edit" @click="dialogZtreeVisible = true">响应报文配置</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="handleDialogZtree('handleResponse')">响应报文配置</el-button>
         </el-form-item>
         <el-form-item label="响应报文格式配置" prop="responseStruct">
           <el-input v-model="temp.responseStruct" readonly="true"/>
@@ -172,7 +172,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="报文配置"  width="70%" :visible.sync="dialogZtreeVisible">
+    <el-dialog :title="textMap[dialogType]"  width="70%" :visible.sync="dialogZtreeVisible">
       <template>
         <div class="app-container">
             <el-row :gutter="20">
@@ -303,13 +303,16 @@ export default {
       dialogFormVisible: false,
       dialogZtreeVisible: false,
       dialogStatus: '',
+      dialogType: '',
       textMap: {
         update: '修改接口报文转换配置',
         create: '新增接口报文转换配置',
         requestConfig: '请求报文配置',
         responseConfig: '响应报文配置',
         requestStruct: '请求报文格式配置',
-        responseStruct: '响应报文格式配置'
+        responseStruct: '响应报文格式配置',
+        handleRequest: '请求报文配置',
+        handleResponse: '响应报文配置'
       },
       rules: {
         name: [{ required: true, message: '名字必填', trigger: 'blur' }],
@@ -447,7 +450,33 @@ export default {
         status: 1
       }
     },
+    handleDialogZtree(dialogType) {
+      this.dialogType = dialogType
+      this.dialogZtreeVisible = true
+      this.jsonRight = ''
+      this.jsonLeft = ''
+      this.result = ''
+      this.nodesRight = []
+      this.nodesLeft = []
+    },
     handleZtreeToJson() {
+      var config = ''
+      var arr = this.draged
+      var length = arr.length - 1
+      for (var i in arr) {
+        if (i < length) {
+          config += arr[i] + ','
+        } else {
+          config += arr[i]
+        }
+      }
+      if (this.dialogType === 'handleRequest') {
+        this.temp.requestConfig = config
+        this.temp.requestStruct = this.jsonRight
+      } else if (this.dialogType === 'handleResponse') {
+        this.temp.responseConfig = config
+        this.temp.responseStruct = this.jsonRight
+      }
       this.dialogZtreeVisible = false
     },
     handleCreate() {
