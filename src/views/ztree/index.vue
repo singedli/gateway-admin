@@ -4,7 +4,7 @@
       <el-col :span="8">
         <div class="grid-content bg-purple">
           <el-input
-            v-model="jsonIn"
+            v-model="jsonRight"
             type="textarea"
             :rows="20"
             placeholder="请输入JSON"
@@ -18,15 +18,14 @@
             v-model="result"
             type="textarea"
             :rows="20"
-            placeholder=""
-            @blur="loadDataLeft"
+            readonly="true"
           />
         </div>
       </el-col>
       <el-col :span="8">
         <div class="grid-content bg-purple">
           <el-input
-            v-model="jsonOut"
+            v-model="jsonLeft"
             type="textarea"
             :rows="20"
             placeholder="请输入JSON"
@@ -37,41 +36,50 @@
     </el-row>
     <el-row :gutter="20">
       <el-col :span="8">
-        <div class="grid-content bg-purple">
-          <tree
-            :setting="setting"
-            :nodes="nodesIn"
-            @onCheck="onCheck"
-            @onCreated="handleCreated"
-          />
-        </div>
-      </el-col>
-
-      <el-col :span="4">
-        <div class="grid-content bg-purple">
-          <div class="buttons">
-            <el-button @click="getCheckedNodes" />
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>树状图</span>
+            <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
           </div>
-        </div>
-      </el-col>
-      <el-col :span="4">
-        <div class="grid-content bg-purple">
-          <div class="buttons">
-            <el-button @click="getJson" />
+          <div class="grid-content bg-purple">
+            <tree
+              :setting="settingRight"
+              :nodes="nodesRight"
+              @onCheck="onCheckRight"
+              @onCreated="handleCreatedRight"
+            />
           </div>
-        </div>
+        </el-card>
       </el-col>
       <el-col :span="8">
-        <div class="grid-content bg-purple">
-          <tree
-            :setting="setting"
-            :nodes="nodesOut"
-            @onCheck="onCheck"
-            @onCreated="handleCreated"
-          />
-        </div>
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>操作按钮</span>
+          </div>
+          <div class="grid-content bg-purple">
+            <el-button @click="getCheckedNodes">通过 node 获取</el-button>
+            <el-button style="float: right" @click="getJson">通过 node 获取json</el-button>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>树状图</span>
+            <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+          </div>
+          <div class="grid-content bg-purple">
+            <tree
+              :setting="settingLeft"
+              :nodes="nodesLeft"
+              @onCheck="onCheckLeft"
+              @onCreated="handleCreatedLeft"
+            />
+          </div>
+        </el-card>
       </el-col>
     </el-row>
+
   </div>
 </template>
 <script>
@@ -87,17 +95,17 @@ export default {
   },
   data() {
     return {
-      jsonIn: '',
-      jsonOut: '',
-      showIndex: 0,
-      ztreeObj: null,
-      nodesIn: [],
-      nodesOut: [],
+      jsonRight: '',
+      jsonLeft: '',
+      ztreeObjRight: null,
+      ztreeObjLeft: null,
+      nodesRight: [],
+      nodesLeft: [],
       selected: [],
       draging: '',
       result: '',
       draged: [],
-      setting: {
+      settingRight: {
         check: {
           enable: true
         },
@@ -121,25 +129,49 @@ export default {
           showRenameBtn: true,
           showRemoveBtn: true
         },
-        view: {
-          showIcon: true,
-          addHoverDom: this.addHoverDom,
-          removeHoverDom: this.removeHoverDom
+        callback: {
+          onDrag: this.zTreeOnDrag,
+          onDrop: this.zTreeOnDropRight
+        }
+      },
+      settingLeft: {
+        check: {
+          enable: true
+        },
+        data: {
+          simpleData: {
+            enable: true,
+            pIdKey: 'pid'
+          }
+        },
+        edit: {
+          enable: true,
+          drag: {
+            isMove: false,
+            isCopy: true,
+            prev: true,
+            inner: true,
+            next: true
+          },
+          removeTitle: '删除节点',
+          renameTitle: '编辑节点名称',
+          showRenameBtn: true,
+          showRemoveBtn: true
         },
         callback: {
           onDrag: this.zTreeOnDrag,
-          onDrop: this.zTreeOnDrop
+          onDrop: this.zTreeOnDropLeft
         }
       }
     }
   },
   methods: {
     loadDataRight() {
-      var param = JSON.parse(this.jsonIn)
+      var param = JSON.parse(this.jsonRight)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
           var json = JSON.parse(response.data)
-          this.nodesIn = json
+          this.nodesRight = json
         } else {
           this.$notify({
             title: '转换',
@@ -151,11 +183,11 @@ export default {
       })
     },
     loadDataLeft() {
-      var param = JSON.parse(this.jsonOut)
+      var param = JSON.parse(this.jsonLeft)
       messageConverterToTree(param).then(response => {
         if (response.code === successCode) {
           var json = JSON.parse(response.data)
-          this.nodesOut = json
+          this.nodesLeft = json
         } else {
           this.$notify({
             title: '转换',
@@ -166,38 +198,10 @@ export default {
         }
       })
     },
-    addHoverDom(treeid, treeNode) {
-      const item = document.getElementById(`${treeNode.tId}_a`)
-      if (item && !item.querySelector('.tree_extra_btn')) {
-        const btn = document.createElement('sapn')
-        btn.id = `${treeid}_${treeNode.id}_btn`
-        btn.classList.add('tree_extra_btn')
-        btn.innerText = '删除'
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation()
-          this.clickRemove(treeNode)
-        })
-        item.appendChild(btn)
-      }
-    },
-    removeHoverDom(treeid, treeNode) {
-      const item = document.getElementById(`${treeNode.tId}_a`)
-      if (item) {
-        const btn = item.querySelector('.tree_extra_btn')
-        if (btn) {
-          item.removeChild(btn)
-        }
-      }
-    },
-    clickRemove(treeNode) {
-      console.log('remove', treeNode)
-      this.ztreeObj && this.ztreeObj.removeNode(treeNode)
-    },
     getCheckedNodes() {
       alert(JSON.stringify(this.selected))
     },
     getJson() {
-      // alert(JSON.stringify(this.jsonOut))
       alert(JSON.stringify(this.draged))
     },
     handleDragParent(treeNode, pNode, pName) {
@@ -207,9 +211,7 @@ export default {
       } else {
         var parentNode = pNode.getParentNode()
         var parentName = ''
-        console.log(parentNode.name)
         if (isNaN(pName)) {
-          // alert(parentNode.name)
           parentName = parentNode.name + '.' + pName
         } else {
           parentName = parentNode.name
@@ -226,7 +228,6 @@ export default {
         var parentNode = pNode.getParentNode()
         var parentName = ''
         if (isNaN(pName)) {
-          // alert(parentNode.name)
           parentName = parentNode.name + '.' + pName
         } else {
           parentName = parentNode.name
@@ -245,7 +246,7 @@ export default {
         this.handleDragParent(treeNode, pNode, pName)
       }
     },
-    zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+    zTreeOnDropRight(event, treeId, treeNodes, targetNode, moveType) {
       var targetName = ''
       if (targetNode.parentTId == null) {
         var name = targetNode.name.split(':')[0]
@@ -258,18 +259,65 @@ export default {
 
       if (moveType === 'inner') {
         if (targetNode != null) {
-          // var treeName = treeNodes[0].name
-          // var targetName = targetNode.name
-          console.log(targetNode.getParentNode())
-          console.log(targetNode.getIndex())
-          this.ztreeObj.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
-          this.ztreeObj.removeNode(targetNode)
-          var node = this.draging + '=' + targetName
-          this.draged.push(node)
-          this.result = JSON.stringify(this.draged)
+          this.$confirm('请选择覆盖或者新增！', '提示', {
+            confirmButtonText: '覆盖',
+            cancelButtonText: '新增',
+            type: 'warning',
+            center: true
+          }).then(() => {
+            this.ztreeObjLeft.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+            this.ztreeObjLeft.removeNode(targetNode)
+            var node = this.draging + '=' + targetName
+            this.draged.push(node)
+            this.result = JSON.stringify(this.draged)
+            this.$message({
+              type: 'info',
+              message: '覆盖成功!'
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '新增成功!'
+            })
+          })
         }
-        console.log(treeNodes)
-        console.log(targetNode)
+      }
+    },
+    zTreeOnDropLeft(event, treeId, treeNodes, targetNode, moveType) {
+      var targetName = ''
+      if (targetNode.parentTId == null) {
+        var name = targetNode.name.split(':')[0]
+        targetName = name
+      } else {
+        var pNode = targetNode.getParentNode()
+        var pName = pNode.name
+        targetName = this.handleTargetParent(targetNode, pNode, pName, targetName)
+      }
+
+      if (moveType === 'inner') {
+        if (targetNode != null) {
+          this.$confirm('请选择覆盖或者新增！', '提示', {
+            confirmButtonText: '覆盖',
+            cancelButtonText: '新增',
+            type: 'warning',
+            center: true
+          }).then(() => {
+            this.ztreeObjRight.addNodes(targetNode.getParentNode(), targetNode.getIndex(), treeNodes, false)
+            this.ztreeObjRight.removeNode(targetNode)
+            var node = targetName + '=' + this.draging
+            this.draged.push(node)
+            this.result = JSON.stringify(this.draged)
+            this.$message({
+              type: 'info',
+              message: '覆盖成功!'
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '新增成功!'
+            })
+          })
+        }
       }
     },
     handleParent(treeNode, pNode, pName) {
@@ -289,13 +337,7 @@ export default {
         this.handleParent(treeNode, parentNode, parentName)
       }
     },
-    onClick: function(evt, treeId, treeNode) {
-      // 点击事件
-      // console.log(treeNode)
-      // console.log(treeNode.parentTId)
-      // console.log(evt.type, treeNode)
-    },
-    onCheck: function(evt, treeId, treeNode) {
+    onCheckRight: function(evt, treeId, treeNode) {
       if (treeNode.parentTId == null) {
         var name = treeNode.name.split(':')[0]
         if (treeNode.checked) {
@@ -312,14 +354,32 @@ export default {
         this.handleParent(treeNode, pNode, pName)
       }
     },
-    handleCreated: function(ztreeObj) {
-      this.ztreeObj = ztreeObj
+    onCheckLeft: function(evt, treeId, treeNode) {
+      if (treeNode.parentTId == null) {
+        var name = treeNode.name.split(':')[0]
+        if (treeNode.checked) {
+          this.selected.push(name)
+        } else {
+          var index = this.selected.indexOf(name)
+          if (index > -1) {
+            this.selected.splice(index, 1)
+          }
+        }
+      } else {
+        var pNode = treeNode.getParentNode()
+        var pName = pNode.name
+        this.handleParent(treeNode, pNode, pName)
+      }
+    },
+    handleCreatedRight: function(ztreeObj) {
+      this.ztreeObjRight = ztreeObj
       // onCreated 中操作ztreeObj对象展开第一个节点
       ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
     },
-    update: function() {
-      // 更新示例数据
-      this.showIndex = this.showIndex === 0 ? 1 : 0
+    handleCreatedLeft: function(ztreeObj) {
+      this.ztreeObjLeft = ztreeObj
+      // onCreated 中操作ztreeObj对象展开第一个节点
+      ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
     }
   }
 }
