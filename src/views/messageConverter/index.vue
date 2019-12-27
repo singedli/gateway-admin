@@ -72,7 +72,7 @@
           <span height="150px" @click="handleDialog(row.requestStruct,'requestStruct')">{{ row.requestStruct }}</span>
         </template>
       </el-table-column>
-      <el-table-column show-overflow-tooltip="true" label="响应报文配置" width="150px" align="center" prop="responseConfig">
+      <!-- <el-table-column show-overflow-tooltip="true" label="响应报文配置" width="150px" align="center" prop="responseConfig">
         <template slot-scope="{row}">
           <span height="150px" @click="handleDialog(row.responseConfig,'responseConfig')">{{ row.responseConfig }}</span>
         </template>
@@ -81,7 +81,7 @@
         <template slot-scope="{row}">
           <span height="10px" @click="handleDialog(row.responseStruct,'responseStruct')">{{ row.responseStruct }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="状态" width="150px" align="center">
         <template slot-scope="{row}">{{ row.status ? "生效" : "失效" }}</template>
       </el-table-column>
@@ -148,13 +148,13 @@
         <el-form-item label="请求报文格式配置" prop="requestStruct">
           <el-input v-model="temp.requestStruct" readonly="true"/>
         </el-form-item>
-        <el-form-item label="响应报文配置" prop="responseConfig">
+        <!-- <el-form-item label="响应报文配置" prop="responseConfig">
           <el-input v-model="temp.responseConfig" readonly="true"/>
           <el-button type="primary" icon="el-icon-edit" @click="handleDialogZtree('handleResponse')">响应报文配置</el-button>
         </el-form-item>
         <el-form-item label="响应报文格式配置" prop="responseStruct">
           <el-input v-model="temp.responseStruct" readonly="true"/>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="状态" prop="status">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
             <el-option
@@ -323,15 +323,15 @@ export default {
         requestConfig: [
           { required: true, message: '请求报文配置必填', trigger: 'blur' }
         ],
-        responseConfig: [
-          { required: true, message: '响应报文配置必填', trigger: 'blur' }
-        ],
+        // responseConfig: [
+        //   { required: true, message: '响应报文配置必填', trigger: 'blur' }
+        // ],
         requestStruct: [
           { required: true, message: '请求报文格式配置必填', trigger: 'blur' }
-        ],
-        responseStruct: [
-          { required: true, message: '响应报文格式配置必填', trigger: 'blur' }
         ]
+        // responseStruct: [
+        //   { required: true, message: '响应报文格式配置必填', trigger: 'blur' }
+        // ]
       },
       statusOptions,
       dataShow: '',
