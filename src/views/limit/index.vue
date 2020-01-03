@@ -100,6 +100,7 @@
           <el-input v-model="updateForm.url" autocomplete="off" label="url" />
         </el-form-item>
         <el-form-item label="需验证请求key">
+          <el-input type="hidden"  v-model="updateForm.jsontree"/>
           <el-input v-model="updateForm.keyLimit" autocomplete="off" label="需验证请求key" readonly="true"/>
           <el-button type="primary" icon="el-icon-edit" @click="handleDialogZtree()">需验证请求key</el-button>
         </el-form-item>
@@ -243,9 +244,10 @@ export default {
       updateForm: {
         url: '',
         status: '',
-        keylimit:'',
+        keyLimit:'',
         maxCount:'',
-        timeUnit:''
+        timeUnit:'',
+        jsontree:''
       },
       systemData: [],
        calendarTypeOptions,
@@ -368,7 +370,7 @@ export default {
       })
     },
     handleUpdate(interfaceConfig) {
-      console.log(interfaceConfig.status);
+      this.jsonRight = this.updateForm.jsontree
       interfaceConfig.status = interfaceConfig.status?1:0
       this.dialogCreateVisible = true
       this.updateForm = interfaceConfig
@@ -444,7 +446,11 @@ export default {
     handleDialogZtree(dialogType) {
       this.dialogType = dialogType
       this.dialogZtreeVisible = true
-      this.jsonRight = ''
+      if(this.updateForm.jsontree != null && this.updateForm.jsontree != ''){
+          this.jsonRight = this.updateForm.jsontree
+      }else{
+        this.jsonRight = ''
+      }
       this.jsonLeft = ''
       this.result = ''
       this.nodesRight = []
@@ -462,102 +468,10 @@ export default {
         }
       }
       this.updateForm.keyLimit = config
+      this.updateForm.jsontree = this.jsonRight
       this.dialogZtreeVisible = false
     },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    createData() {
-      this.$refs['dataForm'].validate(valid => {
-        if (valid) {
-          console.log(this.temp)
-          createMessageConverter(this.temp).then(response => {
-            console.log(response)
-            if (response.code === successCode) {
-              this.$notify({
-                title: '成功',
-                message: '新增成功',
-                type: 'success',
-                duration: 2000
-              })
-            } else {
-              this.$notify({
-                title: '失败',
-                message: '新增失败',
-                type: 'failure',
-                duration: 2000
-              })
-            }
-            this.dialogFormVisible = false
-            this.getList()
-          })
-        }
-      })
-    },
-    handleUpdate(row) {
-      console.log(row.id)
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.status = this.temp.status ? 1 : 0
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    updateData() {
-      this.$refs['dataForm'].validate(valid => {
-        if (valid) {
-          console.log(this.temp.responseBody)
-          updateMessageConverter(this.temp).then(response => {
-            console.log(response)
-            if (response.code === successCode) {
-              this.$notify({
-                title: '修改',
-                message: '修改成功',
-                type: 'success',
-                duration: 2000
-              })
-            } else {
-              this.$notify({
-                title: '修改',
-                message: '修改失败',
-                type: 'failure',
-                duration: 2000
-              })
-            }
-            this.dialogFormVisible = false
-            this.getList()
-          })
-        }
-      })
-    },
-    handleDelete(row) {
-      console.log(row.id)
-      deleteMessageConverter(row).then(response => {
-        console.log(response)
-        if (response.code === successCode) {
-          this.$notify({
-            title: '删除',
-            message: '删除成功',
-            type: 'success',
-            duration: 2000
-          })
-        } else {
-          this.$notify({
-            title: '删除',
-            message: '删除失败',
-            type: 'failure',
-            duration: 2000
-          })
-        }
-        this.getList()
-      })
-    },
+    
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : sort === `-${key}` ? 'descending' : ''
@@ -727,14 +641,6 @@ export default {
       this.ztreeObjLeft = ztreeObj
       // onCreated 中操作ztreeObj对象展开第一个节点
       ztreeObj.expandNode(ztreeObj.getNodes()[0], true)
-    },
-    handleDialogZtree() {
-      this.dialogZtreeVisible = true
-      this.jsonRight = ''
-      this.jsonLeft = ''
-      this.result = ''
-      this.nodesRight = []
-      this.nodesLeft = []
     },
     getFilePath(treeObj) {
         console.log(treeObj)
