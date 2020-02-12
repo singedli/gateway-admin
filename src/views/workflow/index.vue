@@ -5,6 +5,7 @@
         <el-form-item>
           <el-button @click="addStart">添加开始节点</el-button>
           <el-button @click="openAddStartDialog">添加接口调用任务</el-button>
+          <el-button @click="openCompensateDialog">添加事务补偿任务</el-button>
           <el-button @click="openAddConverterDialog">添加参数转换任务</el-button>
           <el-button @click="addEnd">添加结束节点</el-button>
           <el-button @click="save">保存配置</el-button>
@@ -19,6 +20,10 @@
     </el-main>
     <el-dialog ref="@/views/backonInterface/index" :visible.sync="showQueryBackonInterfaceDialog" width="80%">
       <backonInterface :showcheckedcol="true" @selectedInterface="dismissDialog" />
+    </el-dialog>
+
+    <el-dialog ref="@/views/backonInterface/index" :visible.sync="showQueryBackonInterfaceDialogForCompensate" width="80%">
+      <backonInterface :showcheckedcol="true" @selectedInterface="CompensateDialog" />
     </el-dialog>
 
     <el-dialog ref="@/views/jsonConverter/index" :visible.sync="showQueryJsonConverterDialog" width="80%">
@@ -43,6 +48,7 @@ export default {
       routerParams: {},
       showQueryBackonInterfaceDialog: false,
       showQueryJsonConverterDialog: false,
+      showQueryBackonInterfaceDialogForCompensate: false,
       stateMachineJson: {},
       data: {
         index: 1,
@@ -102,6 +108,9 @@ export default {
     },
     openAddStartDialog() {
       this.showQueryBackonInterfaceDialog = true
+    },
+    openCompensateDialog() {
+      this.showQueryBackonInterfaceDialogForCompensate = true
     },
     openAddConverterDialog() {
       this.showQueryJsonConverterDialog = true
@@ -197,7 +206,7 @@ export default {
         y: this.getNewNodeYAxis(),
         id: item.id,
         index: this.data.nodes.length,
-        stateType: 'task',
+        stateType: item.type,
         url: item.url,
         system: item.system
       }
@@ -205,6 +214,26 @@ export default {
       // var gatewayInterface = this.$route.query
       // var backonList = gatewayInterface.backonUrl
       // backonList.push({ system: item.system, backonUrl: item.backonUrl })
+      this.$refs.vgEditor.propsAPI.add('node', node)
+    },
+    CompensateDialog(item) {
+      item.type = 'compensate'
+      this.showQueryBackonInterfaceDialogForCompensate = false
+      console.log(item)
+      var node = {
+        type: 'node',
+        size: '200*80',
+        shape: 'flow-rect',
+        color: '#CCCCFF',
+        label: '调用' + item.system + '系统的\n' + item.url + '补偿接口',
+        x: 120,
+        y: this.getNewNodeYAxis(),
+        id: item.id,
+        index: this.data.nodes.length,
+        stateType: item.type,
+        url: item.url,
+        system: item.system
+      }
       this.$refs.vgEditor.propsAPI.add('node', node)
     },
     dismissConverterDialog(item) {
@@ -221,7 +250,7 @@ export default {
         y: this.getNewNodeYAxis(),
         id: item.id,
         index: this.data.nodes.length,
-        stateType: 'converter'
+        stateType: item.type
       }
       this.$refs.vgEditor.propsAPI.add('node', node)
     }
