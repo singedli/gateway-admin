@@ -16,6 +16,8 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+import axios from 'axios'
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -25,6 +27,9 @@ import '@/permission' // permission control
  * please remove it before going online! ! !
  */
 import { mockXHR } from '../mock'
+
+axios.defaults.baseURL = process.env.API_ROOT
+
 if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
